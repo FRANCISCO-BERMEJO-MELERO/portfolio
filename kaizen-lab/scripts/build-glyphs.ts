@@ -3,7 +3,8 @@
 // la de KanjiVG). Escribe src/generated/kanji-geometry.ts.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import opentype from 'opentype.js';
-import { parsePath, transform, toD, length, sample, bbox, type Affine } from './svg-path.ts';
+import { parsePath, transform, sample, bbox, type Affine, type Pt } from './svg-path.ts';
+import { partition, RES, SNAP, SNAP_ANGLE, BAND_TOL, EPS } from './partition.ts';
 import { kanjiFit } from '../src/data/kanji-fit.ts';
 
 const BOX = 109;
@@ -63,22 +64,61 @@ for (const { char, file } of KANJI) {
     ty: c + (tgt.y1 - kb.y1 * sy - c) * a.sy + a.ty,
   };
 
+  const placed = segs.map((s) => transform(s, m));
+  const t0 = performance.now();
+  const part = partition(glyphD, placed.map((s) => sample(s, 24)), BOX);
+  if (part.stats.unlabeledInkPx > 0) throw new Error(`${char}: ${part.stats.unlabeledInkPx} px de tinta sin zona`);
+  console.log(
+    `  ${char}: partición ${part.size}² px en ${Math.round(performance.now() - t0)} ms · ` +
+      `tinta ${part.stats.inkPx} px · por trazo [${part.stats.perStrokeInkPx.join(', ')}]\n` +
+      `     centrado [${part.offsets.map((o) => `${o.dx},${o.dy}/${Math.round((o.angle * 180) / Math.PI * 10) / 10}°`).join(' ')}] · semigrosor [${part.halfWidths.map(round).join(', ')}]`,
+  );
   out.push({
     char,
     codepoint: `U+${char.codePointAt(0)!.toString(16).toUpperCase()}`,
     glyphD,
-    glyphBox: Object.fromEntries(Object.entries(glyphBox).map(([k, v]) => [k, Math.round(v * 100) / 100])),
-    strokes: segs.map((s, k) => {
-      const t = transform(s, m);
-      const start = t[0]![0];
+    glyphBox: Object.fromEntries(Object.entries(glyphBox).map(([k, v]) => [k, round(v)])),
+    // Las máscaras siguen las mismas líneas (centradas y ajustadas a su tinta) que la partición.
+    strokes: part.lines.map((line, k) => {
+      const first = line[0]!;
+      const last = line[line.length - 1]!;
       return {
         n: k + 1,
-        d: toD(t),
-        length: Math.round(length(t) * 100) / 100,
-        start: { x: Math.round(start.x * 100) / 100, y: Math.round(start.y * 100) / 100 },
+        d: 'M' + line.map((p) => `${round(p.x)} ${round(p.y)}`).join('L'),
+        length: round(polylineLength(line)),
+        start: pt(first),
+        end: pt(last),
+        // Dirección de avance en cada extremo (sobre ~2 u), para prolongar la máscara de punta recta.
+        startDir: dir([first, line[Math.min(4, line.length - 1)]!]),
+        endDir: dir([line[Math.max(0, line.length - 5)]!, last]),
+        zone: part.clips[k]!,
+        minWidth: part.minWidths[k]!,
       };
     }),
   });
+}
+
+function polylineLength(line: Pt[]) {
+  let l = 0;
+  for (let i = 1; i < line.length; i++) l += Math.hypot(line[i]!.x - line[i - 1]!.x, line[i]!.y - line[i - 1]!.y);
+  return l;
+}
+
+function round(n: number) {
+  return Math.round(n * 100) / 100;
+}
+
+function pt(p: Pt) {
+  return { x: round(p.x), y: round(p.y) };
+}
+
+/** Primer par de puntos no coincidentes → vector unitario de a hacia b. */
+function dir(...pairs: [Pt, Pt][]): Pt {
+  for (const [a, b] of pairs) {
+    const l = Math.hypot(b.x - a.x, b.y - a.y);
+    if (l > 1e-6) return { x: Math.round(((b.x - a.x) / l) * 1e4) / 1e4, y: Math.round(((b.y - a.y) / l) * 1e4) / 1e4 };
+  }
+  throw new Error('Trazo degenerado');
 }
 
 function commandsToD(commands: opentype.PathCommand[]): string {
@@ -106,6 +146,7 @@ await writeFile(
   `// GENERADO por scripts/build-glyphs.ts — no editar a mano.
 // Glifos de Shippori Mincho Regular (OFL) y trazos de KanjiVG (CC BY-SA 3.0, Ulrich Apel).
 export const BOX = ${BOX};
+// Partición: ${RES} px/unidad, centrado ≤ ${SNAP} u y ±${SNAP_ANGLE}°, holgura de banda ${BAND_TOL} u, solape hacia trazos anteriores ${EPS} u.
 export const kanjiGeometry = ${JSON.stringify(out, null, 2)} as const;
 export type KanjiChar = (typeof kanjiGeometry)[number]['char'];
 `,

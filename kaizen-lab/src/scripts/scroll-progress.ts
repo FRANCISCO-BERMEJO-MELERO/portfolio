@@ -22,9 +22,11 @@ export function startScrollProgress(scene: HTMLElement, stage: HTMLElement): Scr
   };
 
   const write = (p: number) => {
-    if (p === value) return;
-    value = p;
-    scene.style.setProperty('--p', p.toFixed(4));
+    // El valor guardado es exactamente el que ve el CSS (los tramos usan 5 decimales).
+    const v = Math.round(p * 1e6) / 1e6;
+    if (v === value) return;
+    value = v;
+    scene.style.setProperty('--p', String(v));
   };
 
   const update = () => {

@@ -1,5 +1,5 @@
 // Utilidades mínimas de paths SVG para el build: parseo a cúbicas absolutas,
-// transformación afín, longitud y serialización.
+// transformación afín, muestreo y caja.
 
 export type Pt = { x: number; y: number };
 export type Cubic = [Pt, Pt, Pt, Pt];
@@ -106,13 +106,6 @@ export function sample(segs: Cubic[], perSeg = 64): Pt[] {
   return pts;
 }
 
-export function length(segs: Cubic[]): number {
-  const pts = sample(segs, 256);
-  let len = 0;
-  for (let k = 1; k < pts.length; k++) len += Math.hypot(pts[k]!.x - pts[k - 1]!.x, pts[k]!.y - pts[k - 1]!.y);
-  return len;
-}
-
 export function bbox(pts: Pt[]) {
   const xs = pts.map((p) => p.x);
   const ys = pts.map((p) => p.y);
@@ -122,17 +115,4 @@ export function bbox(pts: Pt[]) {
 export function transform(segs: Cubic[], m: Affine): Cubic[] {
   const f = (p: Pt): Pt => ({ x: p.x * m.sx + m.tx, y: p.y * m.sy + m.ty });
   return segs.map((s) => s.map(f) as Cubic);
-}
-
-const r = (n: number) => String(Math.round(n * 100) / 100);
-
-export function toD(segs: Cubic[]): string {
-  let d = '';
-  let last: Pt | null = null;
-  for (const [p0, p1, p2, p3] of segs) {
-    if (!last || last.x !== p0.x || last.y !== p0.y) d += `M${r(p0.x)} ${r(p0.y)}`;
-    d += `C${r(p1.x)} ${r(p1.y)} ${r(p2.x)} ${r(p2.y)} ${r(p3.x)} ${r(p3.y)}`;
-    last = p3;
-  }
-  return d;
 }

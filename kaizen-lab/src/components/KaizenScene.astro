@@ -1,0 +1,195 @@
+---
+// Escena kaizen: 改善 se dibuja trazo a trazo con el scroll.
+// Cada kanji es el glifo de Shippori (tinta) enmascarado por los trazos de KanjiVG,
+// que se «escriben» con stroke-dashoffset en función de --p (0 → 1).
+import { BOX, kanjiGeometry } from '../generated/kanji-geometry.ts';
+import { kanjiMasks } from '../data/kanji-masks.ts';
+
+const share = 1 / kanjiGeometry.length; // 改: 0 → 0,5 · 善: 0,5 → 1
+
+const kanji = kanjiGeometry.map((k, i) => {
+  const widths = kanjiMasks[k.char];
+  if (widths.length !== k.strokes.length) {
+    throw new Error(`kanji-masks.ts: ${k.char} tiene ${k.strokes.length} trazos y hay ${widths.length} grosores`);
+  }
+  // Cada trazo ocupa un tramo proporcional a su longitud dentro del tramo de su kanji.
+  const total = k.strokes.reduce((sum, s) => sum + s.length, 0);
+  let acc = 0;
+  const start = i * share;
+  return {
+    ...k,
+    id: `kaizen-${i}`,
+    end: start + share,
+    strokes: k.strokes.map((s, j) => {
+      const s0 = start + (acc / total) * share;
+      acc += s.length;
+      const s1 = start + (acc / total) * share;
+      return { ...s, width: widths[j]!, from: round(s0), to: round(s1) };
+    }),
+  };
+});
+
+function round(n: number) {
+  return Math.round(n * 1e5) / 1e5;
+}
+---
+
+<section class="scene" data-kaizen-scene aria-label="Kaizen">
+  <div class="stage" data-kaizen-stage>
+    <div class="pair" role="img" aria-label="改善, kaizen">
+      {
+        kanji.map((k) => (
+          <svg
+            class="kanji"
+            viewBox={`0 0 ${BOX} ${BOX}`}
+            aria-hidden="true"
+            data-char={k.char}
+            style={`--kend: ${k.end}`}
+          >
+            <defs>
+              <mask id={`${k.id}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={BOX} height={BOX}>
+                {k.strokes.map((s) => (
+                  <path
+                    class="brush"
+                    d={s.d}
+                    stroke-width={s.width}
+                    stroke-dasharray={`${s.length} ${s.length}`}
+                    data-n={s.n}
+                    style={`--s: ${s.from}; --e: ${s.to}; --len: ${s.length}`}
+                  />
+                ))}
+              </mask>
+            </defs>
+            <path class="guide" d={k.glyphD} />
+            <path class="ink" d={k.glyphD} mask={`url(#${k.id}-mask)`} />
+            <g class="debug-layer" data-debug-layer>
+              {k.strokes.map((s, j) => (
+                <g style={`--hue: ${(j * 360) / k.strokes.length}`} data-n={s.n}>
+                  <path class="debug-mask" d={s.d} stroke-width={s.width} />
+                  <path class="debug-line" d={s.d} />
+                  <circle class="debug-dot" cx={s.start.x} cy={s.start.y} r="2.6" />
+                  <text class="debug-num" x={s.start.x} y={s.start.y}>
+                    {s.n}
+                  </text>
+                </g>
+              ))}
+            </g>
+          </svg>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .scene {
+    --p: 0;
+    --ink: #1b1a17;
+    --guide: #d6cfbf;
+    height: 300svh;
+  }
+
+  .stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  /* Móvil: 改 encima de 善, ~260 px */
+  .pair {
+    --size: min(260px, 46svh, calc(100vw - 48px));
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Escritorio: uno al lado del otro, ~440 px cada uno */
+  @media (min-width: 960px) {
+    .pair {
+      --size: min(440px, 90svh, calc((100vw - 96px) / 2));
+      flex-direction: row;
+    }
+  }
+
+  .kanji {
+    display: block;
+    width: var(--size);
+    height: var(--size);
+    overflow: visible;
+  }
+
+  .guide {
+    fill: var(--guide);
+    /* Al terminar el kanji la guía desaparece: el resultado es solo el glifo. */
+    opacity: clamp(0, (var(--kend) - var(--p)) * 100000, 1);
+  }
+
+  .ink {
+    fill: var(--ink);
+  }
+
+  .brush {
+    --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dashoffset: calc(var(--len) * (1 - var(--t)) * 1px);
+    /* Un trazo no empezado no deja ni el punto del remate redondo. */
+    stroke-opacity: clamp(0, (var(--p) - var(--s)) * 100000, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scene {
+      --p: 1 !important;
+      height: auto;
+    }
+    .stage {
+      position: relative;
+    }
+  }
+
+  /* ---- Modo depuración (?debug) ---- */
+  .scene:not([data-debug]) .debug-layer {
+    display: none;
+  }
+  .debug-mask {
+    fill: none;
+    stroke: hsl(var(--hue) 85% 50% / 0.22);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .debug-line {
+    fill: none;
+    stroke: hsl(var(--hue) 85% 42%);
+    stroke-width: 0.7;
+    stroke-linecap: round;
+  }
+  .debug-dot {
+    fill: hsl(var(--hue) 85% 42%);
+  }
+  .debug-num {
+    fill: #fff;
+    font: 600 3.4px/1 system-ui, sans-serif;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .scene[data-hide-masks] .debug-mask {
+    display: none;
+  }
+</style>
+
+<script>
+  import { startScrollProgress } from '../scripts/scroll-progress.ts';
+
+  const scene = document.querySelector<HTMLElement>('[data-kaizen-scene]');
+  const stage = document.querySelector<HTMLElement>('[data-kaizen-stage]');
+  if (scene && stage) {
+    const progress = startScrollProgress(scene, stage);
+    if (new URLSearchParams(location.search).has('debug')) {
+      import('../scripts/debug.ts').then(({ startDebug }) => startDebug(scene, progress));
+    }
+  }
+</script>

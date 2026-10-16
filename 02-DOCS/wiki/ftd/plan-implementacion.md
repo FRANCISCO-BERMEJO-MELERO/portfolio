@@ -1,39 +1,22 @@
 ---
 author: Francisco Bermejo
 branch: develop
-status: approved
+status: draft-pending-approval
 date: 2026-10-16
-approved: 2026-10-17
 ---
 
 # Plan de implementación · portfolio completo
 
 ## Intent
-Construir el portfolio de una página, **solo en español** (`/`), en escritorio y móvil, papel y sumi,
+Construir el portfolio de una página (ES en `/`, EN en `/en/`) en escritorio y móvil, papel y sumi,
 integrando la escena kaizen ya validada sin rehacerla. Este documento decide la arquitectura y
 divide el trabajo en fases de una sesión, cada una con su commit y sus criterios medibles.
-No contiene código.
-
-## Respuestas de Fran (17 oct 2026)
-| # | Pregunta | Respuesta | Efecto en el plan |
-| --- | --- | --- | --- |
-| P1 | Ramas | Sí: una rama por fase desde `develop`, PR a `develop`; a `main` al publicar | §3.1 |
-| P2 | `kaizen-lab/` → `web/` | Aprobado | §1.1 |
-| P3 | Safari antes de la fase 3 | Sí. **Retirado el 17 oct** (fase 3, F18): no se prueba en Safari antes de la fase 8 | Queda solo el criterio 6 de la fase 8 |
-| P4 | Preview desplegado | **No**: se despliega al terminar todo | Las pruebas en móvil real y Safari se hacen en red local |
-| P5 | Contradicciones | **C1: se sigue la definición (4 hitos)**; el resto, la propuesta | §2, fase 5 |
-| P6 | Menú móvil | Lo diseña Fran; se deja para el final | Sale de la fase 1; entra en la fase 8 con su maqueta |
-| P7 | Fase 7 nueva | Aprobada | Fase 7 |
-| P8 | Definición en el repo | Sí | Movida a `02-DOCS/raw/` |
-| P9 | Email | En claro | Fase 6 |
-| P10 | CV / idiomas | **De momento la web solo en español** | Fuera: `/en/`, selector de idioma, `hreflang`, traducción y CV en inglés (§1.7) |
-| P11 | Traslado de las maquetas a `reference/` | Incluirlo en el primer commit de la fase 1 | Fase 1 |
-| P12 | Firefox ya no está instalado (17 oct) | **Fuera de la auditoría**: `qa:kaizen` y D10 solo en Chrome | §1.8, D10 |
+No contiene código. Se ejecuta cuando Fran lo apruebe.
 
 ## Fuentes leídas
 | Fuente | Dónde | Papel en el plan |
 | --- | --- | --- |
-| Definición del portfolio (15 oct 2026) | `02-DOCS/raw/Portfolio de Fran — Definición.md` (y su PDF) | Qué se construye y por qué |
+| Definición del portfolio (15 oct 2026) | `~/Downloads/Portfolio de Fran — Definición.md` (fuera del repo) | Qué se construye y por qué |
 | Referencias de escritorio | `reference/portfolio-fran-escritorio.html` (14 maquetas a 1440 × 900) | Fuente de verdad de medidas y estilos |
 | Referencias de móvil | `reference/portfolio-fran-movil.html` (13 maquetas a 390 px) | Ídem |
 | Escena kaizen | `kaizen-lab/` y `02-DOCS/wiki/ftd/kaizen-escena.md` | Se integra tal cual |
@@ -157,22 +140,23 @@ cumplen. Ningún texto sobre `--accent` puede bajar de 18,66 px en negrita.
 - `color-scheme` y `<meta name="theme-color">` acordes a cada modo.
 - Sin JS: manda `prefers-color-scheme` (los tokens se definen también con la media query).
 
-### 1.7 Idioma y contenido
-- **Solo español por ahora (P10).** Una página en `/`, `<html lang="es">`. No hay rutas `/en/`,
-  selector de idioma, `hreflang` ni traducción. Esto se aparta de la definición y de las maquetas,
-  que muestran el selector ES / EN en la navegación: la barra se monta sin él.
-- Para que añadir el inglés más adelante sea barato, los textos de interfaz se centralizan igualmente
-  en `src/i18n/ui.ts` (un solo idioma). No se configura el i18n de Astro.
-- `src/data/{site,projects,journey,stack}.ts`: contenido en español, separado del marcado.
+### 1.7 i18n y contenido
+- i18n de Astro: `es` por defecto sin prefijo, `en` en `/en/`. Las dos páginas renderizan el mismo
+  componente `Home` con su `locale`.
+- `src/i18n/ui.ts`: textos de interfaz tipados. El tipo exige las mismas claves en ES y EN:
+  falta una traducción → `astro check` falla.
+- `src/data/{site,projects,journey,stack}.ts`: contenido con campos `{ es, en }`.
 - **Marcadores.** El contenido pendiente se escribe con `pending('frase del hero')`. Se ve como
   `[frase del hero]` (igual que en las maquetas), lleva `data-pending` y lo lista `pnpm content:pending`.
   En la fase 8, `STRICT_CONTENT=1 pnpm build` falla si queda alguno.
 - `usedIn` del stack **se calcula** desde `projects.ts`. El build falla si un proyecto usa una
   tecnología que no está en `stack.ts`.
+- El selector de idioma son **enlaces** (`<a hreflang lang>`) a la página equivalente, no botones
+  `aria-pressed` como en la maqueta: cambiar de idioma es navegar.
 
 ### 1.8 Herramientas de verificación (sin Playwright)
-Decisión previa de Fran: nada de Playwright. Se usa Chrome instalado por CDP (Firefox salió de la
-auditoría el 17 oct, P12). Se añaden en la fase 1 bajo `web/scripts/qa/`:
+Decisión previa de Fran: nada de Playwright. Se usan Chrome y Firefox instalados por CDP y WebDriver
+BiDi, como en la fase kaizen. Se añaden en la fase 1 bajo `web/scripts/qa/`:
 
 | Comando | Qué mide |
 | --- | --- |
@@ -180,8 +164,8 @@ auditoría el 17 oct, P12). Se añaden en la fase 1 bajo `web/scripts/qa/`:
 | `pnpm qa:specs` | Compara estilos calculados (tamaño, interlineado, colores, paddings) de elementos marcados con `data-qa` contra la tabla de medidas de las maquetas (`scripts/qa/reference-specs.ts`) |
 | `pnpm qa:axe` | axe-core inyectado: 0 incidencias *serious* o *critical*, en los dos modos |
 | `pnpm qa:overflow` | Sin scroll horizontal a 360, 390, 768, 1024, 1280 y 1440 px |
-| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms (tras una pasada de calentamiento que no cuenta; fase 1, D9) |
-| `pnpm qa:kaizen` | Ejecuta la auditoría del `?debug` en Chrome y falla si fuga, hueco o diff ≠ 0 |
+| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms |
+| `pnpm qa:kaizen` | Ejecuta la auditoría del `?debug` en Chrome y Firefox y falla si fuga, hueco o diff ≠ 0 |
 | `pnpm qa` | Todo lo anterior |
 
 Lighthouse se ejecuta con su CLI (usa el Chrome instalado).
@@ -203,12 +187,12 @@ Lighthouse se ejecuta con su CLI (usa el Chrome instalado).
 ---
 
 ## 2. Contradicciones entre referencias y definición
-Resueltas por Fran el 17 oct 2026: C1 sigue la definición; el resto, la propuesta. C9 (menú móvil)
-queda para el final con una maqueta suya.
+Me pediste avisar antes de decidir. Ninguna está decidida: cada fila tiene una propuesta provisional,
+que solo se aplica si la apruebas. Las que afectan a una fase concreta bloquean esa fase.
 
-| # | Tema | Definición | Referencias | Decisión | Fase |
+| # | Tema | Definición | Referencias | Propuesta | Bloquea |
 | --- | --- | --- | --- | --- | --- |
-| C1 | Hitos de la trayectoria | 4: DAM 2023 → Fernauro → prácticas Gavisa → empleado Gavisa (IA) | 5: Inicio del DAM · FP dual Fernauro · Prácticas Gavisa · **Título y contrato** · **Giro a la IA** | **Definición: 4 hitos.** Se mantienen las medidas de la maqueta repartidas en 4 columnas | Fase 5 |
+| C1 | Hitos de la trayectoria | 4: DAM 2023 → Fernauro → prácticas Gavisa → empleado Gavisa (IA) | 5: Inicio del DAM · FP dual Fernauro · Prácticas Gavisa · **Título y contrato** · **Giro a la IA** | Seguir las referencias (5) | Fase 5 (solo el número de columnas) |
 | C2 | Año 2023 | «DAM 2023» (parece el inicio) | 2023 aparece en «Título y contrato» | Lo decides tú con las fechas reales | Fase 8 |
 | C3 | Sello del inicio | Se estampa al cargar | Además viaja con el scroll hasta la navegación (la nav está vacía hasta entonces) | Las dos cosas: se estampa al cargar y luego viaja | Fase 2 |
 | C4 | Sello de contacto | «Se estampa sobre el titular» | A la derecha de «¿Hablamos?» (escritorio) y debajo a la derecha (móvil), sin taparlo | Seguir las referencias | Fase 6 |
@@ -216,23 +200,19 @@ queda para el final con una maqueta suya.
 | C6 | Nombre del grupo | «Backend» | «Backend y herramientas» | Seguir las referencias | — |
 | C7 | Pesos de Inter | 400 y 500 | Usa 600 en botones | Añadir 600 (+~25 KB) | Fase 1 |
 | C8 | Fuente de texto | Inter **o** Zen Kaku Gothic New | Inter | Inter | Fase 1 |
-| C9 | Navegación móvil | No se menciona | Menú hamburguesa; no hay maqueta del menú abierto | **Lo diseña Fran.** Hasta entonces, la barra móvil sin menú | Fase 8 |
+| C9 | Navegación móvil | No se menciona | Menú hamburguesa; no hay maqueta del menú abierto | Panel a pantalla completa con las seis secciones y sus índices 一–六 (diseño a validar) | Fase 1 |
 | C10 | «Sobre mí» en móvil | Párrafo + datos rápidos + kaizen | Solo el kaizen; no aparecen el párrafo ni los datos rápidos | Párrafo y datos rápidos en flujo normal, antes de la escena | Fase 3 |
 | C11 | Kaizen en sumi | Validar el modo oscuro en una maqueta | No hay maqueta del kaizen en sumi | Tinta = `--text`, guía = `--line`; validar con captura en la fase 3 | Fase 3 |
 | C12 | Ensō | Transición o fondo del hero | Al lado del nombre, con el sello encima; no dice si se anima | Se dibuja una vez al cargar (≈ 1,2 s) y después cae el sello | Fase 2 |
 | C13 | Separadores sumi-e | 2 o 3 en toda la web | No aparecen | Dos, entre Proyectos→Trayectoria y Stack→Contacto, con `InkStroke` | Fase 6 |
 | C14 | Enlaces de contacto en móvil | — | Alto mínimo 32 px (el resto de la web usa 44 px) | 44 px en todos | — |
-| C15 | Selector de idioma | ES / EN en la navegación | Selector ES / EN | **Fuera por ahora (P10)**: la web solo en español | — |
 
 ---
 
 ## 3. Reglas comunes a todas las fases
 
 ### 3.1 Forma de trabajar
-- Una fase por sesión, en su rama `fase/N-<nombre>` creada desde `develop`. Al terminar: commit,
-  push y PR a `develop`. A `main` solo se lleva al publicar (fase 8).
-- Sin preview desplegado (P4): las pruebas en un móvil real y en Safari se hacen en red local con
-  `pnpm dev --host`.
+- Una fase por sesión. Al terminar: commit (y PR si se decide trabajar con ramas, ver P1).
 - Cada fase abre su documento FTD en `02-DOCS/wiki/ftd/fase-N-<nombre>.md` con checklist y evidencias,
   como `kaizen-escena.md`.
 - Si una fase se alarga, se corta en su **punto de corte** (indicado en cada fase) con un commit
@@ -253,7 +233,7 @@ Todo se comprueba en escritorio (1440 × 900) y móvil (390 × 844), en papel y 
 | D7 | Sin JS | El contenido se ve completo y legible (equivale a reduced motion) |
 | D8 | Sin desbordes | `pnpm qa:overflow`: 0 scroll horizontal de 360 a 1440 px |
 | D9 | Fluidez | `pnpm qa:perf`: 0 fotogramas > 33 ms en 3 pasadas |
-| D10 | Kaizen intacto (desde la fase 1) | `pnpm qa:kaizen`: 0 fuga, 0 hueco, diff final 0 px en Chrome (P12) |
+| D10 | Kaizen intacto (desde la fase 1) | `pnpm qa:kaizen`: 0 fuga, 0 hueco, diff final 0 px en Chrome y Firefox |
 | D11 | Peso | JS propio ≤ 30 KB gzip sin contar el `?debug` (se mide en cada fase y se anota la evolución) |
 
 ---
@@ -263,41 +243,37 @@ Todo se comprueba en escritorio (1440 × 900) y móvil (390 × 844), en papel y 
 ### Fase 1 · Base
 
 **Objetivo.** El esqueleto completo sobre el que se montan las secciones: proyecto, tokens, fuentes,
-layout, navegación, tema, textos centralizados, contenido con marcadores, motor de scroll y
-herramientas de QA.
+layout, navegación, tema, i18n, contenido con marcadores, motor de scroll y herramientas de QA.
 
-**Entregable.** `/` con la navegación fija funcionando y las seis secciones vacías (solo su
+**Entregable.** `/` y `/en/` con la navegación fija funcionando y las seis secciones vacías (solo su
 encabezado 一–六), en papel y sumi. El kaizen del lab sigue en `/lab/kaizen` sobre el motor nuevo.
-En móvil, la barra lleva el sello y el selector de tema; el menú llega en la fase 8 (C9).
 
 **Archivos.**
-- Primer commit (P11): el traslado de las maquetas a `reference/` (borrado en la raíz + alta en
-  `reference/`).
 - Se mueve: `kaizen-lab/` → `web/` (`git mv`).
 - Se crean:
   - `web/src/styles/tokens.css` (§1.5), `web/src/styles/global.css` (reset, tipografía base, `.visually-hidden`, foco)
   - `web/scripts/subset-fonts.ts`, `web/src/assets/fonts/*.woff2` (generados)
   - `web/src/layouts/Layout.astro` (head, script de tema, `html.js`, fuentes, `lang`)
-  - `web/src/components/Nav.astro`, `ThemeToggle.astro`, `SectionHeading.astro` (índice kanji + título)
+  - `web/src/components/Nav.astro`, `NavMenu.astro` (móvil), `ThemeToggle.astro`, `LangSwitch.astro`, `SectionHeading.astro` (índice kanji + título)
   - `web/src/components/sections/{Hero,About,Projects,Journey,Stack,Contact}.astro` (vacías)
-  - `web/src/components/Home.astro`, `web/src/pages/index.astro`
-  - `web/src/i18n/ui.ts` (textos de interfaz, solo ES)
+  - `web/src/components/Home.astro`, `web/src/pages/index.astro`, `web/src/pages/en/index.astro`
+  - `web/src/i18n/ui.ts`, `web/src/i18n/utils.ts`
   - `web/src/data/{site,projects,journey,stack}.ts` + `web/src/lib/pending.ts`
-  - `web/src/scripts/scroll.ts`, `theme.ts`, `nav.ts` (sección activa)
+  - `web/src/scripts/scroll.ts`, `theme.ts`, `nav.ts` (sección activa, menú móvil)
   - `web/scripts/qa/*` (§1.8) y `web/scripts/qa/reference-specs.ts` (nav, encabezados de sección)
   - `web/scripts/content-pending.ts`
   - `LICENSE-kanji.md`
-- Se modifican: `web/package.json` (nombre, scripts), `web/astro.config.mjs` (`site`, fuentes),
+- Se modifican: `web/package.json` (nombre, scripts), `web/astro.config.mjs` (i18n, `site`, fuentes),
   `web/scripts/fetch-assets.ts`, `KaizenScene.astro` (solo el import del motor), `debug.ts` → `kaizen-debug.ts`.
 - Se borra: `web/src/scripts/scroll-progress.ts` (sustituido por `scroll.ts`).
 
 **Criterios de aceptación.**
-1. `pnpm qa:kaizen` sobre `/lab/kaizen` con el motor nuevo: 0 / 0 / 0 px en Chrome (igual que en el lab; P12).
+1. `pnpm qa:kaizen` sobre `/lab/kaizen` con el motor nuevo: 0 / 0 / 0 px en Chrome y Firefox (igual que en el lab).
 2. Navegación: 88 px en escritorio, 64 px en móvil, fija; `qa:specs` ±1 px contra d-01 y m-01.
 3. Sección activa: al hacer scroll por las seis secciones, el enlace correcto lleva `aria-current` en 6/6 posiciones de prueba.
 4. Tema: sin elección guardada sigue al sistema; tras elegir, se recuerda al recargar; 0 parpadeo del modo equivocado (captura del primer pintado con CPU ×4).
-5. Barra móvil: 64 px con sello y selector de tema; sin botón de menú hasta la fase 8; `<html lang="es">`.
-6. Textos: ningún texto de interfaz escrito a mano en los componentes; todos salen de `ui.ts` o de `data/` (revisión por búsqueda).
+5. Menú móvil: abre y cierra con botón y Esc; el foco queda atrapado dentro y vuelve al botón al cerrar; `aria-expanded` correcto.
+6. Idioma: ES ↔ EN enlaza a la página equivalente; `<html lang>` correcto; quitar una clave de `ui.ts` en EN hace fallar `astro check` (control negativo).
 7. Fuentes: Shippori ≤ 60 KB por peso, total de fuentes ≤ 220 KB; 0 caracteres del contenido sin glifo (el script lo comprueba); CLS ≤ 0,02 al cargar.
 8. Marcadores: `pnpm content:pending` lista todos los `pending()`; `STRICT_CONTENT=1 pnpm build` falla (control negativo).
 9. D1–D11.
@@ -308,7 +284,7 @@ En móvil, la barra lleva el sello y el selector de tema; el menú llega en la f
 | La API de fuentes de Astro 7 no admite proveedor local o cambia de forma | Verificar en la doc de la versión instalada antes de usarla; alternativa `@font-face` manual (§1.4) |
 | Inter de Google Fonts es variable; subconjuntar fijando pesos puede fallar | Probar `subset-font` con instanciado; si falla, usar los estáticos de la *release* oficial de Inter |
 | `git mv` + rutas relativas rompen los scripts de build | El primer paso es mover y comprobar `pnpm build` + `qa:kaizen` antes de añadir nada |
-| La fase es grande | **Punto de corte**: 1a = mover + tokens + fuentes + layout + motor + QA (commit); 1b = nav, tema, textos, datos |
+| La fase es grande | **Punto de corte**: 1a = mover + tokens + fuentes + layout + motor + QA (commit); 1b = nav, menú, tema, i18n, datos |
 
 **Dependencias.** Ninguna. Recomendado antes: la prueba del kaizen en Safari (ver P3).
 
@@ -350,7 +326,7 @@ medidas). En `p = 1` se cambia por el sello de la nav. Ese cambio no debe verse.
 | Riesgo | Mitigación |
 | --- | --- |
 | Salto visible en el relevo hero → nav | Medir los dos rectángulos en el resize; criterio 3 con medida automática |
-| En iOS la barra de direcciones cambia el alto y descoloca el tránsito | Unidades `svh` y re-medida en `resize`; probar en un iPhone en red local (`pnpm dev --host`) |
+| En iOS la barra de direcciones cambia el alto y descoloca el tránsito | Unidades `svh` y re-medida en `resize`; probar en el preview desplegado (P4) |
 | La «mancha de tinta» con filtros SVG animados cuesta en móvil | Mancha precalculada como forma SVG estática; solo se animan `transform` y `opacity` |
 | Tamaños intermedios (tablet) sin maqueta | Escala fluida entre 390 y 1440; capturas a 768 y 1024 en el FTD para validarlas tú |
 
@@ -377,7 +353,7 @@ y sumi. Se borra `/lab/kaizen`.
 - Se borran: `web/src/pages/lab/kaizen.astro`.
 
 **Criterios de aceptación.**
-1. `pnpm qa:kaizen` sobre `/`: 0 fuga, 0 hueco, diff final 0 px, en Chrome (P12), en papel **y** en sumi.
+1. `pnpm qa:kaizen` sobre `/` y `/en/`: 0 fuga, 0 hueco, diff final 0 px, en Chrome y Firefox, en papel **y** en sumi.
 2. Estados: capturas a `p = 0`, `0,5` y `1` comparables con d-04/05/06 y m-03/04/05; opacidades de la columna iguales a las maquetas.
 3. Encaje: a 1440 × 900 la sección completa cabe en el escenario sticky; a 1280 × 720 y a 375 × 667 no se corta nada (los kanji se reducen; si no cabe, el párrafo sale del escenario).
 4. Accesibilidad: 改善 se anuncia una vez («改善, kaizen») y la columna de significado se lee como texto; los SVG van `aria-hidden`.
@@ -439,7 +415,7 @@ animaciones propias, que van en la fase 7).
 | Riesgo | Mitigación |
 | --- | --- |
 | El contenido de un panel no cabe en el escenario a alturas medias | Umbral de alto (700 px) con *fallback* apilado; criterio a 1280 × 720 |
-| `scroll-snap` y pestañas desincronizados en Safari | Sincronizar con IntersectionObserver (no con `scrollend`, que Safari soporta peor); probar en un iPhone en red local |
+| `scroll-snap` y pestañas desincronizados en Safari | Sincronizar con IntersectionObserver (no con `scrollend`, que Safari soporta peor); probar en preview |
 | Anclas `#proyecto` caen en mitad de un tramo | `projects.ts` intercepta el *hash* y calcula el scroll del tramo |
 | Las capturas reales cambian de proporción | Marco con `aspect-ratio` fijo y `object-fit`; versión horizontal y vertical con `<picture>` |
 
@@ -463,16 +439,16 @@ años en horizontal).
 - Se modifican: `sections/Journey.astro`, `data/journey.ts`, `reference-specs.ts`.
 
 **Comportamiento.**
-- Escritorio: escena sticky. Cuatro columnas (C1: los 4 hitos de la definición); años con `writing-mode: vertical-rl` y
+- Escritorio: escena sticky. Cinco columnas; años con `writing-mode: vertical-rl` y
   `text-orientation: upright`; el trazo avanza de izquierda a derecha; al llegar a cada hito, su
   círculo se rellena y su columna pasa de opacidad 0,4 a 1.
 - Móvil: sin sticky. Modo `pass`: el trazo vertical avanza mientras la lista atraviesa la ventana.
 - Los hitos se marcan con `data-step` (no se anuncian con `aria-live`: es decoración del orden).
 
 **Criterios de aceptación.**
-1. Cada hito se ilumina exactamente cuando la punta del trazo alcanza su círculo (±4 px), en los 4 hitos, en escritorio y móvil.
+1. Cada hito se ilumina exactamente cuando la punta del trazo alcanza su círculo (±4 px), en los 5 hitos, en escritorio y móvil.
 2. Estados intermedios comparables con d-09 (tres hitos encendidos) y m-08.
-3. Años en vertical legibles en Chrome, Firefox y Safari (Safari en red local).
+3. Años en vertical legibles en Chrome, Firefox y Safari (captura en el preview).
 4. La lista es un `<ol>` con los hitos en orden y legible sin el trazo.
 5. D1–D11.
 
@@ -481,7 +457,7 @@ años en horizontal).
 | --- | --- |
 | `vertical-rl` con dígitos `upright` se ve distinto entre navegadores | Capturas en los tres motores; alternativa: dígitos apilados con un `<span>` por dígito |
 | El trazo se deforma con el ancho (`preserveAspectRatio="none"` de la maqueta) | Escalar solo en el eje largo y mantener el grosor con `vector-effect` o regenerando el perfil por ancho |
-| El número de hitos cambia más adelante | La sección se construye para N hitos desde `journey.ts`, no para 4 fijos |
+| Número de hitos sin cerrar (C1) | La sección se construye para N hitos desde los datos |
 
 **Dependencias.** Fase 1 (motor), fase 2 (`InkStroke`).
 
@@ -509,7 +485,7 @@ marcadores.
 2. `usedIn` coincide 100 % con `projects.ts`; quitar una tecnología de `stack.ts` que use un proyecto hace fallar el build (control negativo).
 3. Aparición escalonada ≤ 600 ms en total; con reduced motion, todo visible al instante.
 4. Contacto: «¿Hablamos?» 184 px en escritorio y 58 px en móvil (±1 px); el sello se estampa una sola vez al entrar en vista; enlaces ≥ 44 px de alto (C14).
-5. CV: el enlace descarga el PDF en español; peso del PDF ≤ 500 KB.
+5. CV: el enlace descarga el PDF correcto (ES y, si existe, EN); peso del PDF ≤ 500 KB.
 6. Pie: © con el año de build, atribución de KanjiVG con enlace y licencia, «Volver arriba» funcional y con foco visible.
 7. Separadores: 2 en toda la página; se dibujan al entrar en vista; `aria-hidden`.
 8. D1–D11.
@@ -518,7 +494,7 @@ marcadores.
 | Riesgo | Mitigación |
 | --- | --- |
 | Hover + clic en el mismo botón se pisan (abre en hover, el clic lo cierra) | En dispositivos con ratón, el hover solo previsualiza; el clic fija o suelta el estado |
-| Email expuesto a *scraping* | Aceptado (P9): va en claro |
+| Email expuesto a *scraping* | Aceptable en un portfolio; si quieres evitarlo, se monta en JS (pregunta P9) |
 | `¿Hablamos?` a 184 px desborda entre 960 y 1200 px con el sello a la derecha | Escala fluida y el sello se recoloca; criterio de desborde D8 |
 
 **Dependencias.** Fase 4 (`projects.ts` para `usedIn` y anclas), fase 2 (`Hanko`, `InkStroke`).
@@ -568,45 +544,41 @@ capturas de La previa, cifras de FinTrack, un artículo del blog.
 
 ### Fase 8 · Cierre
 
-**Objetivo.** Menú móvil, contenido real, SEO, auditoría de accesibilidad, rendimiento, Safari real
-y despliegue.
+**Objetivo.** Contenido real, inglés, SEO, auditoría de accesibilidad, rendimiento, Safari real y
+despliegue.
 
-**Entregable.** La web publicada en el dominio, sin marcadores, en español.
+**Entregable.** La web publicada en el dominio, sin marcadores.
 
 **Archivos.**
-- Se crean: `web/src/components/NavMenu.astro` (según la maqueta de Fran, C9),
-  `web/src/components/Seo.astro` (title, description, canonical, Open Graph, Twitter), JSON-LD
-  (`Person` + `WebSite`), `web/public/og-image.png` (1200 × 630, papel, nombre + sello),
-  `web/public/robots.txt`, `web/src/pages/404.astro`, configuración del despliegue (cabeceras de
-  caché para fuentes y `_astro/`).
-- Se modifican: todos los `data/*.ts` e `i18n/ui.ts` (contenido real), `Nav.astro` (botón de menú),
-  `nav.ts`, `Layout.astro` (SEO), `astro.config.mjs` (`site`, sitemap).
+- Se modifican: todos los `data/*.ts` e `i18n/ui.ts` (contenido real y EN), `Layout.astro` (SEO),
+  `astro.config.mjs` (`site`, sitemap).
+- Se crean: `web/src/components/Seo.astro` (title, description, canonical, `hreflang` es/en/x-default,
+  Open Graph, Twitter), JSON-LD (`Person` + `WebSite`), `web/public/og-image-{es,en}.png` (1200 × 630,
+  papel, nombre + sello), `web/public/robots.txt`, `web/src/pages/404.astro`, configuración del
+  despliegue (cabeceras de caché para fuentes y `_astro/`).
 - Dependencia nueva: `@astrojs/sitemap`.
 
-**Punto de corte.** 8a = menú móvil + contenido real (commit); 8b = SEO, auditorías y despliegue.
-
 **Criterios de aceptación.**
-1. Menú móvil: coincide con la maqueta de Fran (`qa:specs` ±1 px); abre y cierra con botón y Esc; el foco queda atrapado dentro y vuelve al botón al cerrar; `aria-expanded` correcto; papel, sumi y reduced motion.
-2. `STRICT_CONTENT=1 pnpm build` pasa: 0 marcadores.
-3. SEO: validadores de Open Graph y de datos estructurados sin errores; `sitemap-index.xml` con la URL de la web.
-4. Lighthouse ≥ 95 en las cuatro categorías, móvil y escritorio (2 mediciones, mediana de 3 pasadas cada una).
+1. `STRICT_CONTENT=1 pnpm build` pasa: 0 marcadores.
+2. EN completo: 0 claves sin traducir; revisado por ti.
+3. SEO: validadores de Open Graph y de datos estructurados sin errores; `sitemap-index.xml` con las dos URLs y sus alternativas `hreflang`.
+4. Lighthouse ≥ 95 en las cuatro categorías, móvil y escritorio, en `/` y `/en/` (16 mediciones, mediana de 3).
 5. Accesibilidad manual: recorrido completo con teclado; NVDA en Windows; VoiceOver en iOS y macOS; zoom al 200 % sin pérdida de contenido.
-6. Safari real (iOS y macOS): auditoría `?debug` del kaizen 0 / 0 / 0 sobre la web desplegada y recorrido de las seis secciones en los dos modos.
+6. Safari real (iOS y macOS): auditoría `?debug` del kaizen 0 / 0 / 0 (cierra el criterio 4 de la fase kaizen) y recorrido de las seis secciones en los dos modos.
 7. Despliegue: HTTPS, dominio, 404 propia, fuentes con `Cache-Control: immutable`.
 8. D1–D11 sobre la web desplegada.
 
 **Riesgos.**
 | Riesgo | Mitigación |
 | --- | --- |
-| Safari falla tarde (no hay preview, P4) | Prueba del lab antes de la fase 3 y comprobación en red local (`pnpm dev --host`) al cerrar cada fase con animación (2–6) |
-| El primer despliegue revela diferencias con local (rutas, cabeceras, caché) | `pnpm build && pnpm preview` en local como paso previo; despliegue en 8b con tiempo para corregir |
-| La maqueta del menú llega tarde | La fase 8a empieza por el contenido; el menú se hace cuando llegue la maqueta |
+| Safari falla tarde | Prueba del lab antes de la fase 3 y comprobación en el preview en cada fase (P3, P4) |
 | Lighthouse < 95 por el peso de Shippori o del HTML del kaizen (184 KB) | Presupuestos medidos desde la fase 1 (criterio 7 y D11); el kaizen ya da 46 KB gzip |
+| La traducción suena traducida | Borrador mío, revisión tuya; las frases del hero y del kaizen las decides tú |
 
-**Dependencias.** Todas las anteriores. Maqueta del menú móvil de Fran.
+**Dependencias.** Todas las anteriores.
 
-**Contenido de Fran.** Bloqueante: todo lo de la lista «Pendiente de Fran» de la definición, maqueta
-del menú móvil, dominio y cuenta de despliegue.
+**Contenido de Fran.** Bloqueante: todo lo de la lista «Pendiente de Fran» de la definición, dominio
+y cuenta de despliegue.
 
 ---
 
@@ -628,16 +600,35 @@ Orden propuesto: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. La 7 puede adelant
 | 2 | Rol, frase del hero, iniciales del sello | No |
 | 3 | Párrafo «Sobre mí», tu versión del kaizen, datos rápidos, foto sí/no | No |
 | 4 | Por proyecto: problema, stack, enlaces, dato, capturas | No |
-| 5 | Fechas y frase por hito (4 hitos, C1); año de cada uno (C2) | No |
-| 6 | Stack final, email, LinkedIn, CV en PDF (español) | No |
+| 5 | Fechas y frase por hito; C1 y C2 | No |
+| 6 | Stack final, email, LinkedIn, CV en PDF | No |
 | 7 | Material de cada proyecto (TUI, hash, capturas, cifras, artículo) | **Sí** |
-| 8 | Todo lo anterior + maqueta del menú móvil + dominio y despliegue | **Sí** |
+| 8 | Todo lo anterior + revisión del inglés + dominio y despliegue | **Sí** |
 
 ---
 
-## 7. Preguntas
-Las 11 preguntas del borrador están resueltas (ver «Respuestas de Fran»). Queda abierta una, que no
-bloquea hasta la fase 5:
+## 7. Preguntas abiertas
+Cada una lleva mi recomendación. Las marcadas con ⛔ bloquean el arranque de la fase 1.
 
-- **C2 · Año de cada hito.** La definición dice «DAM 2023» y la maqueta pone 2023 en «Título y
-  contrato». Con los 4 hitos de la definición, ¿qué año lleva cada uno?
+1. ⛔ **Ramas.** `main` está cerrada (ramas y PR). ¿Trabajo cada fase en su rama (`fase/1-base`, …)
+   desde `develop` con PR a `develop`, y a `main` solo al publicar? *Recomendado: sí.*
+2. ⛔ **Ubicación.** ¿Apruebas mover `kaizen-lab/` a `web/` con `git mv` (§1.1)? ¿O prefieres otro
+   nombre, o el proyecto en la raíz?
+3. **Safari antes de la fase 3.** El criterio 4 del kaizen sigue abierto. ¿Puedes pasar la auditoría
+   `?debug` en un iPhone o Mac antes de la fase 3? Si las máscaras fallan en Safari, cambia el enfoque
+   de la escena y conviene saberlo antes de integrarla.
+4. **Preview desplegado desde la fase 1.** ¿Vercel o Cloudflare Pages? Con un preview por rama
+   puedes revisar cada fase en tu móvil sin estar en la misma red. Implica conectar el repo a una
+   cuenta tuya.
+5. **Contradicciones C1–C13** (§2). ¿Apruebas las propuestas? Las que bloquean fase: C3 y C12 (fase 2),
+   C7, C8 y C9 (fase 1), C10 y C11 (fase 3), C4, C5 y C13 (fase 6).
+6. **Menú móvil (C9).** No hay maqueta del menú abierto. ¿Lo diseño yo (panel a pantalla completa
+   con 一–六) y lo validas con capturas, o prefieres hacer tú la maqueta antes?
+7. **Fase 7 nueva.** ¿Apruebas separar los detalles propios de cada proyecto en su propia fase?
+8. **Definición dentro del repo.** Está en `Downloads`, fuera del repo. ¿La copio a
+   `02-DOCS/raw/` para que las próximas sesiones la tengan? *Recomendado: sí.*
+9. **Email.** ¿En claro en el HTML o montado con JS para esquivar *scrapers*? *Recomendado: en claro.*
+10. **CV.** ¿Uno en español o también uno en inglés para `/en/`?
+11. **Commit pendiente.** El movimiento de las maquetas a `reference/` aún no está en git
+    (`git status`: dos ficheros borrados en la raíz y `reference/` sin seguimiento). ¿Lo incluyo en el
+    primer commit de la fase 1 o lo haces tú antes?

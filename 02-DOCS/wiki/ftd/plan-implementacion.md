@@ -19,7 +19,7 @@ No contiene código.
 | --- | --- | --- | --- |
 | P1 | Ramas | Sí: una rama por fase desde `develop`, PR a `develop`; a `main` al publicar | §3.1 |
 | P2 | `kaizen-lab/` → `web/` | Aprobado | §1.1 |
-| P3 | Safari antes de la fase 3 | Sí | Requisito de la fase 3 (en red local, `pnpm dev --host`) |
+| P3 | Safari antes de la fase 3 | Sí. **Retirado el 17 oct** (fase 3, F18): no se prueba en Safari antes de la fase 8 | Queda solo el criterio 6 de la fase 8 |
 | P4 | Preview desplegado | **No**: se despliega al terminar todo | Las pruebas en móvil real y Safari se hacen en red local |
 | P5 | Contradicciones | **C1: se sigue la definición (4 hitos)**; el resto, la propuesta | §2, fase 5 |
 | P6 | Menú móvil | Lo diseña Fran; se deja para el final | Sale de la fase 1; entra en la fase 8 con su maqueta |

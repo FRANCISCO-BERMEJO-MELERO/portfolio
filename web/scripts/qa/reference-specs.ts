@@ -38,6 +38,8 @@ export type Spec = {
   path: string;
   /** Selector del elemento (siempre un data-qa). Si hay varios, se mide el primero. */
   qa: string;
+  /** Filtro añadido al selector, p. ej. ':not([aria-current])'. */
+  state?: string;
   /** Tamaño de la caja sin transformar (offsetWidth / offsetHeight, o el rect en SVG). */
   box?: { width?: number; height?: number };
   css?: Record<string, Expected>;
@@ -101,6 +103,7 @@ export const SPECS: Spec[] = [
     viewport: 'desktop',
     path: '/',
     qa: 'nav-link',
+    state: ':not([aria-current])',
     css: {
       color: t('text-2'),
       'font-family': SANS,
@@ -114,7 +117,8 @@ export const SPECS: Spec[] = [
     ref: 'd-01',
     viewport: 'desktop',
     path: '/',
-    qa: 'nav-link-current',
+    qa: 'nav-link',
+    state: '[aria-current]',
     css: { color: t('text'), 'border-bottom-width': 1, 'border-bottom-style': 'solid', 'border-bottom-color': t('text') },
   },
   {

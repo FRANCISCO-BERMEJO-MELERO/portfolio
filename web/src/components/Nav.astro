@@ -1,0 +1,156 @@
+---
+// Navegación fija (d-01 escritorio, m-01 móvil). El sello va fijo hasta que la fase 2 añada el
+// tránsito desde el hero (F4). En móvil no hay lista de enlaces hasta que llegue el menú (fase 8):
+// la lista existe, oculta, y nav.ts la sigue marcando.
+import { sections, ui } from '../i18n/ui.ts';
+import { site } from '../data/site.ts';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header class="nav-header" data-qa="nav-header">
+  <nav class="nav" aria-label={ui.nav.label} data-qa="nav">
+    <a class="home hit" href="#inicio" aria-label={ui.nav.home(site.hanko.text)} data-qa="nav-home">
+      <span class="hanko" aria-hidden="true" data-logo data-pending={site.hanko.pending} data-qa="nav-hanko">{site.hanko.text}</span>
+    </a>
+    <ul class="links" data-qa="nav-list">
+      {
+        sections.map((s) => (
+          <li>
+            <a class="link hit" href={`#${s.id}`} data-nav-link data-qa="nav-link">
+              {s.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="tools" data-qa="nav-tools">
+      <ThemeToggle />
+    </div>
+  </nav>
+</header>
+
+<script>
+  import '../scripts/nav.ts';
+</script>
+
+<style>
+  .nav-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Móvil (m-01): 64 px, sello a la izquierda, herramientas a la derecha. */
+  .nav {
+    height: 64px;
+    padding: 0 12px 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: normal;
+  }
+
+  .home {
+    display: flex;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .hanko {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    border-radius: 3px;
+    outline: 1.5px solid var(--on-accent);
+    outline-offset: -4px;
+    transform: rotate(-3deg);
+  }
+
+  .links {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Área pulsable ≥ 44 × 44 sin mover nada (D5, F2): el sello móvil mide 36 y los enlaces cortos
+     («Stack») menos de 44 de ancho. 46 px porque se centra en la caja de relleno y el borde del
+     enlace activo la desplaza medio píxel. */
+  .hit {
+    position: relative;
+  }
+
+  .hit::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 46px);
+    height: max(100%, 46px);
+    transform: translate(-50%, -50%);
+  }
+
+  /* Escritorio (d-01): 88 px, enlaces a la derecha y herramientas tras un separador. */
+  @media (min-width: 960px) {
+    .nav {
+      max-width: var(--max-w);
+      height: 88px;
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      gap: 48px;
+    }
+
+    .home {
+      margin-right: 0;
+    }
+
+    .hanko {
+      width: 44px;
+      height: 44px;
+      font-size: 19px;
+      outline-offset: -5px;
+    }
+
+    .links {
+      display: flex;
+      gap: 28px;
+      margin-left: auto;
+      font-size: 16px;
+    }
+
+    .link {
+      display: flex;
+      padding: 12px 0;
+      color: var(--text-2);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    .link:hover {
+      color: var(--text);
+    }
+
+    .link[aria-current] {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    .tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 32px;
+      border-left: 1px solid var(--line);
+    }
+  }
+</style>

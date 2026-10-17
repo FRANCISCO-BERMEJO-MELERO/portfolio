@@ -19,7 +19,7 @@ No contiene código.
 | --- | --- | --- | --- |
 | P1 | Ramas | Sí: una rama por fase desde `develop`, PR a `develop`; a `main` al publicar | §3.1 |
 | P2 | `kaizen-lab/` → `web/` | Aprobado | §1.1 |
-| P3 | Safari antes de la fase 3 | Sí | Requisito de la fase 3 (en red local, `pnpm dev --host`) |
+| P3 | Safari antes de la fase 3 | Sí. **Retirado el 17 oct** (fase 3, F18): no se prueba en Safari antes de la fase 8 | Queda solo el criterio 6 de la fase 8 |
 | P4 | Preview desplegado | **No**: se despliega al terminar todo | Las pruebas en móvil real y Safari se hacen en red local |
 | P5 | Contradicciones | **C1: se sigue la definición (4 hitos)**; el resto, la propuesta | §2, fase 5 |
 | P6 | Menú móvil | Lo diseña Fran; se deja para el final | Sale de la fase 1; entra en la fase 8 con su maqueta |
@@ -180,7 +180,7 @@ auditoría el 17 oct, P12). Se añaden en la fase 1 bajo `web/scripts/qa/`:
 | `pnpm qa:specs` | Compara estilos calculados (tamaño, interlineado, colores, paddings) de elementos marcados con `data-qa` contra la tabla de medidas de las maquetas (`scripts/qa/reference-specs.ts`) |
 | `pnpm qa:axe` | axe-core inyectado: 0 incidencias *serious* o *critical*, en los dos modos |
 | `pnpm qa:overflow` | Sin scroll horizontal a 360, 390, 768, 1024, 1280 y 1440 px |
-| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms |
+| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms (tras una pasada de calentamiento que no cuenta; fase 1, D9) |
 | `pnpm qa:kaizen` | Ejecuta la auditoría del `?debug` en Chrome y falla si fuga, hueco o diff ≠ 0 |
 | `pnpm qa` | Todo lo anterior |
 

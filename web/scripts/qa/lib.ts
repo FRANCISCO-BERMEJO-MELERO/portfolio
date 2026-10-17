@@ -175,7 +175,13 @@ export async function launch(): Promise<Browser> {
       conn.close();
       proc.kill();
       await sleep(300);
-      rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      // Chrome puede tardar en soltar el perfil: se reintenta y, si sigue bloqueado, se avisa sin
+      // fallar (es limpieza de un temporal, no un resultado de la prueba).
+      try {
+        rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+      } catch {
+        console.warn(`  (aviso: no se pudo borrar el perfil temporal ${profile})`);
+      }
     },
   };
 }

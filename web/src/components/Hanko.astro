@@ -1,0 +1,61 @@
+---
+// Sello (hanko) con las iniciales: relleno bermellón, anillo interior y un leve giro (d-01, d-02,
+// d-07, m-01, m-06). Las medidas de cada uso son tokens (--hanko-<uso>-*, tokens.css). Quien lo
+// contiene puede sustituir el radio, el anillo, su separación, el giro y la escala de la letra con
+// --hanko-radius, --hanko-ring, --hanko-inset, --hanko-rot y --hanko-text-scale: el tránsito de la nav
+// lo hace en cada fotograma. Es el logotipo de la web: data-logo (exento de contraste, F6).
+import { site } from '../data/site.ts';
+
+interface Props {
+  variant: 'hero' | 'nav';
+  [attr: `data-${string}`]: unknown;
+}
+
+const { variant, ...attrs } = Astro.props;
+---
+
+<span class="hanko" data-variant={variant} aria-hidden="true" data-logo data-pending={site.hanko.pending} {...attrs}
+  ><span class="text">{site.hanko.text}</span></span
+>
+
+<style>
+  .hanko {
+    --v-size: var(--hanko-nav-size);
+    --v-font: var(--hanko-nav-font);
+    --v-radius: var(--hanko-nav-radius);
+    --v-ring: var(--hanko-nav-ring);
+    --v-inset: var(--hanko-nav-inset);
+    --v-rot: var(--hanko-nav-rot);
+    width: var(--v-size);
+    height: var(--v-size);
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--v-font);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    border-radius: var(--hanko-radius, var(--v-radius));
+    outline: var(--hanko-ring, var(--v-ring)) solid var(--on-accent);
+    outline-offset: calc(-1 * var(--hanko-inset, var(--v-inset)));
+    transform: rotate(var(--hanko-rot, var(--v-rot)));
+  }
+
+  .hanko[data-variant='hero'] {
+    --v-size: var(--hanko-hero-size);
+    --v-font: var(--hanko-hero-font);
+    --v-radius: var(--hanko-hero-radius);
+    --v-ring: var(--hanko-hero-ring);
+    --v-inset: var(--hanko-hero-inset);
+    --v-rot: var(--hanko-hero-rot);
+  }
+
+  .text {
+    display: block;
+    transform: scale(var(--hanko-text-scale, 1));
+  }
+</style>

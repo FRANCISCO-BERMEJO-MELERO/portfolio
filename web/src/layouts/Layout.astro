@@ -22,6 +22,7 @@ const themeColor = { papel: '#f3efe6', sumi: '#15130f' };
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content={themeColor.papel} media="(prefers-color-scheme: light)" data-theme-color />
     <meta name="theme-color" content={themeColor.sumi} media="(prefers-color-scheme: dark)" data-theme-color />
     {/* Antes del primer pintado: modo guardado o el del sistema, y html.js para las animaciones. */}
@@ -42,8 +43,10 @@ const themeColor = { papel: '#f3efe6', sumi: '#15130f' };
         }
       })();
     </script>
-    <Font cssVariable="--font-sans" preload={[{ weight: 400 }, { weight: 500 }]} />
-    <Font cssVariable="--font-serif" preload={[{ weight: 400 }]} />
+    {/* Se precarga lo que pinta la primera pantalla (hero: Shippori 600, Inter 600 en los botones): si
+        llega tarde, el cambio de fuente rehace la página en mitad de la animación de carga (fase 2). */}
+    <Font cssVariable="--font-sans" preload={[{ weight: 400 }, { weight: 500 }, { weight: 600 }]} />
+    <Font cssVariable="--font-serif" preload={[{ weight: 400 }, { weight: 600 }]} />
     <Font cssVariable="--font-mono" />
   </head>
   <body>

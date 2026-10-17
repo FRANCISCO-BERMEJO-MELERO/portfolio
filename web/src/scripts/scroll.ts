@@ -4,7 +4,10 @@
 //   p = (scrollY − top) / (alto escena − alto escenario).
 // - Modo pass (data-scene="pass"): progreso mientras el elemento atraviesa la ventana, entre
 //   data-scene-start (por defecto "top 100%") y data-scene-end (por defecto "bottom 0%"):
-//   «<borde del elemento> <altura de la ventana>%», con borde top | center | bottom.
+//   «<borde del elemento> <punto de la ventana>», con borde top | center | bottom y punto N%, Npx o
+//   nav (el borde inferior de la navegación fija).
+// - data-scene-track="<selector>" mide otro elemento: el progreso sale de él y --p se escribe en la
+//   escena (así el sello de la nav sigue el paso del hero).
 // - data-steps="n" escribe además data-step="k" (0 … n−1) en la escena.
 // - Un solo listener de scroll y un requestAnimationFrame para todas; solo se recalculan las
 //   escenas cerca de la ventana (IntersectionObserver). Las medidas se cachean (carga, cambios de
@@ -19,9 +22,10 @@ export type Scene = {
   readonly value: number;
 };
 
-type Edge = { at: number; view: number };
+type Edge = { at: number; view: number; px: number; nav: boolean };
 
 type Entry = Scene & {
+  readonly track: HTMLElement;
   update(): void;
   measure(): void;
 };
@@ -30,21 +34,33 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const entries = new Map<HTMLElement, Entry>();
 const near = new Set<Entry>();
 let viewH = innerHeight;
+let navH = 0;
 let queued = false;
 
-/** «top 80%» → borde del elemento (0 arriba, 0,5 centro, 1 abajo) y punto de la ventana (0–1). */
+/** «top 80%» → borde del elemento (0 arriba, 0,5 centro, 1 abajo) y punto de la ventana. */
 function parseEdge(value: string | undefined, fallback: Edge): Edge {
-  const m = value?.trim().match(/^(top|center|bottom)\s+(-?\d+(?:\.\d+)?)%$/);
+  const m = value?.trim().match(/^(top|center|bottom)\s+(?:(nav)|(-?\d+(?:\.\d+)?)(%|px))$/);
   if (!m) return fallback;
-  return { at: { top: 0, center: 0.5, bottom: 1 }[m[1] as 'top' | 'center' | 'bottom'], view: Number(m[2]) / 100 };
+  const n = Number(m[3] ?? 0);
+  return {
+    at: { top: 0, center: 0.5, bottom: 1 }[m[1] as 'top' | 'center' | 'bottom'],
+    view: m[4] === '%' ? n / 100 : 0,
+    px: m[4] === 'px' ? n : 0,
+    nav: m[2] === 'nav',
+  };
 }
+
+/** Distancia desde arriba de la ventana hasta el punto del borde. */
+const point = (edge: Edge) => viewH * edge.view + edge.px + (edge.nav ? navH : 0);
 
 function createScene(el: HTMLElement): Entry {
   const pass = el.dataset['scene'] === 'pass';
   const stage = el.querySelector<HTMLElement>('[data-stage]');
+  const selector = el.dataset['sceneTrack'];
+  const track = (selector && document.querySelector<HTMLElement>(selector)) || el;
   const steps = Number(el.dataset['steps'] ?? 0);
-  const start = parseEdge(el.dataset['sceneStart'], { at: 0, view: 1 });
-  const end = parseEdge(el.dataset['sceneEnd'], { at: 1, view: 0 });
+  const start = parseEdge(el.dataset['sceneStart'], { at: 0, view: 1, px: 0, nav: false });
+  const end = parseEdge(el.dataset['sceneEnd'], { at: 1, view: 0, px: 0, nav: false });
   // Progreso = (scrollY − from) / span, con from y span cacheados.
   let from = 0;
   let span = 1;
@@ -70,12 +86,13 @@ function createScene(el: HTMLElement): Entry {
 
   return {
     el,
+    track,
     measure() {
-      const rect = el.getBoundingClientRect();
+      const rect = track.getBoundingClientRect();
       const top = rect.top + scrollY;
       if (pass) {
-        from = top + rect.height * start.at - viewH * start.view;
-        span = Math.max(1, top + rect.height * end.at - viewH * end.view - from);
+        from = top + rect.height * start.at - point(start);
+        span = Math.max(1, top + rect.height * end.at - point(end) - from);
       } else {
         from = top;
         span = Math.max(1, el.offsetHeight - (stage?.offsetHeight ?? 0));
@@ -110,6 +127,7 @@ function queue() {
 
 function measureAll() {
   viewH = innerHeight;
+  navH = document.querySelector<HTMLElement>('[data-nav-header]')?.offsetHeight ?? 0;
   // Primero todas las lecturas y después todas las escrituras: un solo layout.
   for (const entry of entries.values()) entry.measure();
   // Las lejanas también se escriben: así quedan en su extremo (0 o 1) aunque no se vean.
@@ -138,9 +156,10 @@ const resize = new ResizeObserver(() => {
 function start() {
   for (const el of document.querySelectorAll<HTMLElement>('[data-scene]')) {
     if (entries.has(el)) continue;
-    entries.set(el, createScene(el));
+    const entry = createScene(el);
+    entries.set(el, entry);
     io.observe(el);
-    resize.observe(el);
+    resize.observe(entry.track);
   }
   // body cubre los cambios de layout por encima de las escenas.
   resize.observe(document.body);

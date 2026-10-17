@@ -1,6 +1,7 @@
 ---
 // Encabezado de sección: índice en kanji + título en versalitas (d-04, d-07, d-09, d-11; m-03…).
 // En Inicio y Contacto las maquetas lo usan como antetítulo (<p>), con el titular grande aparte.
+// El slot añade texto tras el título (el «· kaizen» de Sobre mí en móvil).
 import type { SectionId } from '../i18n/ui.ts';
 import { sections } from '../i18n/ui.ts';
 
@@ -14,7 +15,16 @@ const s = sections.find((x) => x.id === section)!;
 ---
 
 <Tag class="heading" id={Tag === 'h2' ? `${s.id}-titulo` : undefined} data-qa="heading">
-  <span class="index" aria-hidden="true" data-qa="heading-kanji">{s.index}</span>{s.title}
+  <span class="index" aria-hidden="true" data-qa="heading-kanji">{s.index}</span>{
+    Astro.slots.has('default') ? (
+      <span>
+        {s.title}
+        <slot />
+      </span>
+    ) : (
+      s.title
+    )
+  }
 </Tag>
 
 <style>

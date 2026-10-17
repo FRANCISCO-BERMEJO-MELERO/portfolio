@@ -2,7 +2,7 @@
 import { arg, run } from './lib.ts';
 
 const WIDTHS = [360, 390, 768, 1024, 1280, 1440];
-const PATHS = (arg('paths') ?? '/,/lab/kaizen/').split(',');
+const PATHS = (arg('paths') ?? '/').split(',');
 
 await run('qa:overflow', async ({ url, browser, fail }) => {
   const page = await browser.newPage();

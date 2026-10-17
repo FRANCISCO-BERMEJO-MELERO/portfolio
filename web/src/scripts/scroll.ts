@@ -1,7 +1,8 @@
 // Motor de scroll compartido (plan §1.3). Cada [data-scene] recibe su progreso 0 → 1 como --p.
 //
 // - Modo sticky (por defecto): la escena es un contenedor alto con un [data-stage] sticky dentro;
-//   p = (scrollY − top) / (alto escena − alto escenario).
+//   p = (scrollY − (top − sticky)) / (alto escena − alto escenario), donde sticky es el `top` del
+//   escenario (bajo la nav: empieza a 0 cuando el escenario se pega, no cuando la escena toca arriba).
 // - Modo pass (data-scene="pass"): progreso mientras el elemento atraviesa la ventana, entre
 //   data-scene-start (por defecto "top 100%") y data-scene-end (por defecto "bottom 0%"):
 //   «<borde del elemento> <punto de la ventana>», con borde top | center | bottom y punto N%, Npx o
@@ -94,7 +95,8 @@ function createScene(el: HTMLElement): Entry {
         from = top + rect.height * start.at - point(start);
         span = Math.max(1, top + rect.height * end.at - point(end) - from);
       } else {
-        from = top;
+        // Sin sticky (sin JS, reduced motion) el `top` calculado es «auto» → 0.
+        from = top - (stage ? Number.parseFloat(getComputedStyle(stage).top) || 0 : 0);
         span = Math.max(1, el.offsetHeight - (stage?.offsetHeight ?? 0));
       }
     },

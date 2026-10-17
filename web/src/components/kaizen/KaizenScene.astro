@@ -3,9 +3,20 @@
 // Cada kanji es el glifo de Shippori (tinta) enmascarado por los trazos de KanjiVG,
 // que se «escriben» con stroke-dashoffset en función de --p (0 → 1). Cada trazo va
 // recortado por su zona del glifo (partición del build): no puede pintar fuera de ella.
+//
+// La escena es el escenario sticky de su sección (fase 3). La sección le pasa la composición:
+//   - slot «head»: encabezado (y en escritorio, el párrafo),
+//   - slot por defecto: la columna de significado (KaizenMeaning), junto a los kanji,
+//   - slot «foot»: lo que va al pie del escenario (en escritorio, los datos rápidos).
+// Rejilla del cuerpo (.body), con las áreas que usa KaizenMeaning:
+//   - escritorio: «pair meaning» (los kanji uno al lado del otro y la columna a la derecha);
+//   - móvil: «pair dl» / «eq eq» / «tx tx» (改 encima de 善, cada uno con su significado al lado,
+//     y debajo la equivalencia y el texto).
+// Sin JS o con reduced motion: --p = 1 (todo dibujado), sin sticky y en flujo normal.
 import { BOX, kanjiGeometry } from '../../generated/kanji-geometry.ts';
 import { kanjiMasks } from '../../data/kanji-masks.ts';
 import { brush } from '../../lib/brush.ts';
+import { ui } from '../../i18n/ui.ts';
 
 const share = 1 / kanjiGeometry.length; // 改: 0 → 0,5 · 善: 0,5 → 1
 
@@ -40,95 +51,161 @@ function round(n: number) {
 }
 ---
 
-<section class="scene" data-scene data-kaizen-scene aria-label="Kaizen">
-  <div class="stage" data-stage>
-    <div class="pair" role="img" aria-label="改善, kaizen">
-      {
-        kanji.map((k) => (
-          <svg
-            class="kanji"
-            viewBox={`0 0 ${BOX} ${BOX}`}
-            aria-hidden="true"
-            data-char={k.char}
-            style={`--kend: ${k.end}`}
-          >
-            <defs>
-              {k.strokes.map((s) => (
-                <clipPath id={`${k.id}-zone-${s.n}`} clipPathUnits="userSpaceOnUse">
-                  <path d={s.zone} clip-rule="evenodd" />
-                </clipPath>
-              ))}
-              <mask id={`${k.id}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={BOX} height={BOX}>
+<div class="scene" data-scene data-kaizen-scene data-qa="kaizen-scene">
+  <div class="stage" data-stage data-qa="kaizen-stage">
+    <slot name="head" />
+    <div class="body" data-qa="kaizen-body">
+      {/* Un solo nombre para la escena; los SVG van ocultos y la columna se lee como texto. */}
+      <p class="visually-hidden"><span lang="ja">{ui.about.kaizen.word}</span>, {ui.about.kaizen.reading}</p>
+      <div class="pair" aria-hidden="true" data-qa="kaizen-pair">
+        {
+          kanji.map((k) => (
+            <svg
+              class="kanji"
+              viewBox={`0 0 ${BOX} ${BOX}`}
+              data-char={k.char}
+              data-qa="kaizen-kanji"
+              style={`--kend: ${k.end}`}
+            >
+              <defs>
                 {k.strokes.map((s) => (
-                  <g clip-path={`url(#${k.id}-zone-${s.n})`}>
-                    <path
-                      class="brush"
-                      d={s.brush.d}
-                      stroke-width={s.width}
-                      stroke-dasharray={`${s.brush.total} ${s.brush.total}`}
-                      data-n={s.n}
-                      style={`--s: ${s.from}; --e: ${s.to}; --len: ${s.length}; --ext: ${s.brush.ext}; --total: ${s.brush.total}`}
-                    />
-                  </g>
+                  <clipPath id={`${k.id}-zone-${s.n}`} clipPathUnits="userSpaceOnUse">
+                    <path d={s.zone} clip-rule="evenodd" />
+                  </clipPath>
                 ))}
-              </mask>
-            </defs>
-            <path class="guide" d={k.glyphD} />
-            <path class="ink" d={k.glyphD} mask={`url(#${k.id}-mask)`} />
-          </svg>
-        ))
-      }
+                <mask id={`${k.id}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={BOX} height={BOX}>
+                  {k.strokes.map((s) => (
+                    <g clip-path={`url(#${k.id}-zone-${s.n})`}>
+                      <path
+                        class="brush"
+                        d={s.brush.d}
+                        stroke-width={s.width}
+                        stroke-dasharray={`${s.brush.total} ${s.brush.total}`}
+                        data-n={s.n}
+                        style={`--s: ${s.from}; --e: ${s.to}; --len: ${s.length}; --ext: ${s.brush.ext}; --total: ${s.brush.total}`}
+                      />
+                    </g>
+                  ))}
+                </mask>
+              </defs>
+              <path class="guide" d={k.glyphD} />
+              <path class="ink" d={k.glyphD} mask={`url(#${k.id}-mask)`} />
+            </svg>
+          ))
+        }
+      </div>
+      <slot />
     </div>
+    <slot name="foot" />
   </div>
-</section>
+</div>
 
 <style>
+  /* Sin JS o con reduced motion: dibujado entero y en flujo normal. */
   .scene {
-    --p: 0;
-    --ink: #1b1a17;
-    --guide: #d6cfbf;
-    height: 300svh;
+    --p: 1;
   }
 
   .stage {
-    position: sticky;
-    top: 0;
-    height: 100svh;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-  }
-
-  /* Móvil: 改 encima de 善, ~260 px */
-  .pair {
-    --size: min(260px, 46svh, calc(100vw - 48px));
+    /* Columnas del escritorio (d-04…06: 880 + 48 + 320 a 1440 px): la de texto se queda entre 280 y
+       320 px y los kanji se reparten el resto. La comparten el encabezado y el cuerpo. */
+    --cols: minmax(0, 1fr) clamp(280px, 25.641%, 320px);
     display: flex;
     flex-direction: column;
+    gap: 12px;
+    padding: 24px 0 20px;
   }
 
-  /* Escritorio: uno al lado del otro, ~440 px cada uno */
-  @media (min-width: 960px) {
-    .pair {
-      --size: min(440px, 90svh, calc((100vw - 96px) / 2));
-      flex-direction: row;
+  /* Con JS y movimiento: escena alta y escenario pegado bajo la nav (y su borde de 1 px). */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .scene {
+      --p: 0;
+      height: 300svh;
+    }
+
+    :global(html.js) .stage {
+      position: sticky;
+      top: calc(var(--nav-h) + 1px);
+      height: calc(100svh - var(--nav-h) - 1px);
+      overflow: hidden;
     }
   }
 
+  /* Móvil (m-03…05): 改 encima de 善 (se solapan 6 px), 260 px como máximo. Se reducen con el
+     ancho (dejan 82 px al significado, como a 390 px) y con el alto: 216 px son el resto del escenario
+     (márgenes, encabezado, equivalencia y texto), para que quepa entero en un iPhone SE. */
+  .body {
+    --k: min(260px, calc(100cqw - 82px), calc((100svh - var(--nav-h) - 1px - 216px) / 2));
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'pair dl'
+      'eq eq'
+      'tx tx';
+    align-content: start;
+  }
+
+  .pair {
+    grid-area: pair;
+    display: flex;
+    flex-direction: column;
+    margin-left: -8px;
+  }
+
   .kanji {
-    display: block;
-    width: var(--size);
-    height: var(--size);
+    width: var(--k);
+    height: var(--k);
     overflow: visible;
   }
 
+  .kanji + .kanji {
+    margin-top: -6px;
+  }
+
+  /* Escritorio (d-04…06): kanji de 440 px uno al lado del otro y la columna de significado a la
+     derecha, centrada con ellos. En el escenario sticky el cuerpo ocupa el alto que dejan el
+     encabezado y el pie, y los kanji se reducen para caber (1280 × 720: criterio 3). */
+  @media (min-width: 960px) {
+    .stage {
+      gap: 36px;
+      padding: 48px 0 40px;
+    }
+
+    .body {
+      --k: min(440px, calc((100cqw - 48px - clamp(280px, 25.641cqw, 320px)) / 2), 100cqh);
+      grid-template-columns: var(--cols);
+      grid-template-areas: 'pair meaning';
+      column-gap: 48px;
+      align-items: center;
+    }
+
+    .pair {
+      flex-direction: row;
+      margin-left: 0;
+    }
+
+    .kanji + .kanji {
+      margin-top: 0;
+    }
+  }
+
+  @media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .body {
+      flex: 1 1 0;
+      min-height: 0;
+      container-type: size;
+    }
+  }
+
   .guide {
-    fill: var(--guide);
+    fill: var(--line);
     /* Al terminar el kanji la guía desaparece: el resultado es solo el glifo. */
     opacity: clamp(0, (var(--kend) - var(--p)) * 100000, 1);
   }
 
   .ink {
-    fill: var(--ink);
+    fill: var(--text);
   }
 
   .brush {
@@ -146,16 +223,6 @@ function round(n: number) {
     );
     /* Un trazo no empezado no deja ni la prolongación inicial. */
     stroke-opacity: clamp(0, (var(--p) - var(--s)) * 100000, 1);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .scene {
-      --p: 1 !important;
-      height: auto;
-    }
-    .stage {
-      position: relative;
-    }
   }
 </style>
 

@@ -9,7 +9,9 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { extname, join, normalize, resolve } from 'node:path';
 
-export const CHROME = process.env['CHROME_BIN'] ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+export const CHROME =
+  process.env['CHROME_BIN'] ??
+  (process.platform === 'win32' ? 'C:/Program Files/Google/Chrome/Application/chrome.exe' : '/usr/bin/google-chrome');
 
 export const VIEWPORTS = {
   desktop: { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false },
@@ -201,7 +203,7 @@ const TYPES: Record<string, string> = {
 export async function serve(): Promise<{ url: string; stop(): void }> {
   if (process.env['QA_URL']) return { url: process.env['QA_URL'].replace(/\/$/, ''), stop() {} };
   const root = resolve('dist');
-  if (!existsSync(join(root, 'index.html')) && !existsSync(join(root, 'lab'))) throw new Error('falta dist/: ejecuta pnpm build');
+  if (!existsSync(join(root, 'index.html'))) throw new Error('falta dist/: ejecuta pnpm build');
   const server = createServer((req, res) => {
     const path = decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname);
     let file = normalize(join(root, path));

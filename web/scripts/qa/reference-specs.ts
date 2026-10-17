@@ -382,4 +382,47 @@ export const SPECS: Spec[] = [
     css: { 'padding-top': 8, 'border-top-width': 1, 'border-top-color': t('line'), 'font-size': 15, color: t('text-2') },
   },
   { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'hero-next', box: { height: 44 }, rect: { x: 286.3 } },
+
+  // --- Sobre mí · escritorio (d-04…06). Las posiciones con el escenario pegado las mide qa:about. ---
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'kaizen-kanji', box: { width: 440, height: 440 } },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'about-head', box: { width: 1248, height: 76 } },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'about-text', box: { width: 320, height: 64 }, css: { 'font-size': 20, 'line-height': 32, color: t('text') } },
+  {
+    ref: 'd-04',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'kaizen-row',
+    box: { width: 320, height: 87 },
+    css: { 'padding-top': 18, 'padding-bottom': 18, 'border-top-width': 1, 'border-top-color': t('line') },
+  },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'kaizen-char', css: { 'font-family': SERIF, 'font-size': 44, 'line-height': 44 } },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'kaizen-reading', css: { 'font-size': 14, 'font-weight': '500', 'letter-spacing': 1.96, color: t('text-2') } },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'kaizen-gloss', css: { 'font-family': SERIF, 'font-size': 32 } },
+  {
+    ref: 'd-04',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'kaizen-result',
+    box: { height: 65.5 },
+    // El color (texto y filete) depende del avance del kaizen (F17): lo comprueba qa:about.
+    css: { 'font-family': SERIF, 'font-size': 34, 'line-height': 42.5, 'padding-top': 22, 'border-top-width': 1 },
+  },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'kaizen-text', css: { 'font-size': 18, 'line-height': 28.8, 'margin-top': 16, color: t('text-2') } },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'about-facts', box: { width: 1248, height: 82 }, css: { 'column-gap': 24 } },
+  { ref: 'd-04', viewport: 'desktop', path: '/', qa: 'about-fact', css: { 'font-family': SERIF, 'font-size': 28, 'margin-top': 8 } },
+
+  // --- Sobre mí · móvil (m-03…05) ---
+  { ref: 'm-03', viewport: 'mobile', path: '/', qa: 'kaizen-kanji', box: { width: 260, height: 260 } },
+  { ref: 'm-03', viewport: 'mobile', path: '/', qa: 'kaizen-row', box: { height: 260 } },
+  { ref: 'm-03', viewport: 'mobile', path: '/', qa: 'kaizen-reading', css: { 'font-size': 13, 'font-weight': '500', 'letter-spacing': 1.82, color: t('text-2') } },
+  { ref: 'm-03', viewport: 'mobile', path: '/', qa: 'kaizen-gloss', css: { 'font-family': SERIF, 'font-size': 22 } },
+  {
+    ref: 'm-03',
+    viewport: 'mobile',
+    path: '/',
+    qa: 'kaizen-result',
+    box: { width: 342, height: 54.5 },
+    css: { 'font-family': SERIF, 'font-size': 30, 'line-height': 37.5, 'margin-top': 8, 'padding-top': 16, 'border-top-width': 1 },
+  },
+  { ref: 'm-03', viewport: 'mobile', path: '/', qa: 'kaizen-text', css: { 'font-size': 17, 'line-height': 26.35, 'margin-top': 12, color: t('text-2') } },
 ];

@@ -1,0 +1,208 @@
+---
+// Columna de significado del kaizen (d-04…06, m-03…05): 改 kai cambiar · 善 zen bueno ·
+// = cambiar a mejor · el texto. Va en el slot por defecto de KaizenScene y hereda su --p.
+//
+// Las maquetas atenúan con opacidad (0,3 → 0,6 → 1) y ese texto no llega a AA. Decisión F17: se
+// atenúa con color, sin bajar de 4,5:1. Cada fila (el kanji y su significado) va en --text-2 hasta
+// que empieza su kanji y en --text desde entonces; la equivalencia pasa a --text al terminar 善
+// (p = 1). El texto de abajo ya es --text-2 y no cambia. Mismo tramo de --p que la escena: cada
+// kanji ocupa 1/n.
+//
+// Escritorio: una columna a la derecha de los kanji (área «meaning»). Móvil: la columna se deshace
+// (display: contents) y cada parte va a su área de la rejilla de la escena: la lista junto a los
+// kanji («dl»), con cada fila a la altura de su kanji, y debajo «eq» y «tx».
+import { kanjiGeometry } from '../../generated/kanji-geometry.ts';
+import { site } from '../../data/site.ts';
+import { ui } from '../../i18n/ui.ts';
+
+const words = ui.about.meaning;
+if (words.map((w) => w.char).join('') !== kanjiGeometry.map((k) => k.char).join('')) {
+  throw new Error('ui.about.meaning no sigue el orden de los kanji de la escena');
+}
+const share = 1 / words.length;
+---
+
+<div class="meaning" data-qa="kaizen-meaning">
+  <dl class="words">
+    {
+      words.map((w, i) => (
+        <div class="row" style={`--s: ${i * share}; --e: ${(i + 1) * share}`} data-qa="kaizen-row">
+          <dt class="char" lang="ja" data-qa="kaizen-char">
+            {w.char}
+          </dt>
+          <dd class="sense">
+            <span class="reading" data-qa="kaizen-reading">{w.reading}</span>
+            <span class="gloss" data-qa="kaizen-gloss">{w.gloss}</span>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  <p class="result" data-qa="kaizen-result">{ui.about.result}</p>
+  <p class="text" data-pending={site.kaizen.pending} data-qa="kaizen-text">{site.kaizen.text}</p>
+</div>
+
+<style>
+  /* --on: 0 (pendiente) o 1 (encendido); el color es uno de los dos tokens, nunca una mezcla. */
+  .row,
+  .result {
+    color: color-mix(in srgb, var(--text) calc(var(--on) * 100%), var(--text-2));
+  }
+
+  .row {
+    --on: clamp(0, (var(--p) - var(--s)) * 100000, 1);
+  }
+
+  .result {
+    /* 1 solo con p = 1 (el último trazo acaba justo ahí). */
+    --on: clamp(0, (var(--p) - 1) * 10000000 + 1, 1);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .row,
+    .result {
+      transition: color 0.2s ease-out;
+    }
+  }
+
+  .reading {
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  .char,
+  .gloss,
+  .result {
+    font-family: var(--font-serif);
+  }
+
+  .text {
+    color: var(--text-2);
+  }
+
+  /* Móvil (m-03…05). */
+  .meaning {
+    display: contents;
+  }
+
+  .words {
+    grid-area: dl;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Cada fila a la altura de su kanji (--k, de la escena), con el mismo solape de 6 px. */
+  .row {
+    height: var(--k);
+    /* Las maquetas no fijan interlineado (con el 1,5 de la web cada fila mediría 1 px más). */
+    line-height: normal;
+    display: flex;
+    align-items: center;
+  }
+
+  .row + .row {
+    margin-top: -6px;
+  }
+
+  /* El kanji ya se ve grande al lado: aquí solo se lee. */
+  .char {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .sense {
+    margin-left: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .reading {
+    font-size: 13px;
+  }
+
+  .gloss {
+    font-size: 22px;
+  }
+
+  .result {
+    grid-area: eq;
+    margin-top: 8px;
+    padding-top: 16px;
+    /* El filete sigue al texto (currentColor), como en las maquetas. */
+    border-top: 1px solid;
+    font-size: 30px;
+    line-height: 1.25;
+  }
+
+  .text {
+    grid-area: tx;
+    margin-top: 12px;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  /* Escritorio (d-04…06). */
+  @media (min-width: 960px) {
+    .meaning {
+      grid-area: meaning;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row {
+      height: auto;
+      align-items: baseline;
+      gap: 24px;
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .row + .row {
+      margin-top: 0;
+    }
+
+    .char {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      font-size: 44px;
+      line-height: 1;
+    }
+
+    .sense {
+      margin-left: 0;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    .reading {
+      font-size: 14px;
+    }
+
+    .gloss {
+      font-size: 32px;
+    }
+
+    .result {
+      margin-top: 0;
+      padding-top: 22px;
+      font-size: 34px;
+    }
+
+    .text {
+      margin-top: 16px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+  }
+</style>

@@ -34,4 +34,17 @@ export const ui = {
     // «Seguir: Sobre mí ↓» en escritorio (d-01); en móvil, sin el prefijo (m-01).
     next: { prefix: 'Seguir:', label: 'Sobre mí' },
   },
+  about: {
+    // En móvil el encabezado dice «Sobre mí · kaizen» (m-03).
+    headingSuffix: 'kaizen',
+    // Nombre de la escena: se anuncia una vez («改善, kaizen»); los SVG van ocultos.
+    kaizen: { word: '改善', reading: 'kaizen' },
+    // Columna de significado (d-04…06, m-03…05), en el orden de los kanji de la escena.
+    meaning: [
+      { char: '改', reading: 'kai', gloss: 'cambiar' },
+      { char: '善', reading: 'zen', gloss: 'bueno' },
+    ],
+    result: '= cambiar a mejor',
+    facts: ['Base', 'Foco', 'Ahora'],
+  },
 } as const;

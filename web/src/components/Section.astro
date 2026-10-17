@@ -1,17 +1,19 @@
 ---
 // Contenedor de sección: ancla, etiqueta accesible y márgenes de las maquetas (escritorio:
 // 48 px arriba y el margen lateral; móvil: 28 px y 24 px). Mientras las secciones están vacías
-// (fase 1) cada una ocupa una pantalla bajo la navegación.
+// (fase 1) cada una ocupa una pantalla bajo la navegación. Con `flush`, sin márgenes arriba y abajo:
+// los pone la sección (Sobre mí los lleva dentro de su escenario sticky).
 import type { SectionId } from '../i18n/ui.ts';
 
 interface Props {
   id: SectionId;
+  flush?: boolean;
 }
 
-const { id } = Astro.props;
+const { id, flush = false } = Astro.props;
 ---
 
-<section id={id} class="section" aria-labelledby={`${id}-titulo`} data-section>
+<section id={id} class:list={['section', { flush }]} aria-labelledby={`${id}-titulo`} data-section>
   <slot />
 </section>
 
@@ -27,5 +29,9 @@ const { id } = Astro.props;
       margin: 0 auto;
       padding: 48px var(--gutter) 48px;
     }
+  }
+
+  .section.flush {
+    padding-block: 0;
   }
 </style>

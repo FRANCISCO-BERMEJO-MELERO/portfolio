@@ -27,7 +27,8 @@
     "qa:kaizen": "node scripts/qa/kaizen.ts",
     "qa:weight": "node scripts/qa/weight.ts",
     "qa:hanko": "node scripts/qa/hanko.ts",
-    "qa:hero": "node scripts/qa/hero.ts"
+    "qa:hero": "node scripts/qa/hero.ts",
+    "qa:about": "node scripts/qa/about.ts"
   },
   "dependencies": {
     "astro": "7.3.5"

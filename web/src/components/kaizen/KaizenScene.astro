@@ -1,0 +1,170 @@
+---
+// Escena kaizen: 改善 se dibuja trazo a trazo con el scroll.
+// Cada kanji es el glifo de Shippori (tinta) enmascarado por los trazos de KanjiVG,
+// que se «escriben» con stroke-dashoffset en función de --p (0 → 1). Cada trazo va
+// recortado por su zona del glifo (partición del build): no puede pintar fuera de ella.
+import { BOX, kanjiGeometry } from '../../generated/kanji-geometry.ts';
+import { kanjiMasks } from '../../data/kanji-masks.ts';
+import { brush } from '../../lib/brush.ts';
+
+const share = 1 / kanjiGeometry.length; // 改: 0 → 0,5 · 善: 0,5 → 1
+
+const kanji = kanjiGeometry.map((k, i) => {
+  const widths = kanjiMasks[k.char];
+  if (widths.length !== k.strokes.length) {
+    throw new Error(`kanji-masks.ts: ${k.char} tiene ${k.strokes.length} trazos y hay ${widths.length} grosores`);
+  }
+  // Cada trazo ocupa un tramo proporcional a su longitud dentro del tramo de su kanji.
+  const total = k.strokes.reduce((sum, s) => sum + s.length, 0);
+  let acc = 0;
+  const start = i * share;
+  return {
+    ...k,
+    id: `kaizen-${i}`,
+    end: start + share,
+    strokes: k.strokes.map((s, j) => {
+      const width = widths[j]!;
+      if (width < s.minWidth) {
+        console.warn(`kanji-masks.ts: ${k.char} trazo ${s.n} con grosor ${width} < ${s.minWidth}: quedarán huecos`);
+      }
+      const s0 = start + (acc / total) * share;
+      acc += s.length;
+      const s1 = start + (acc / total) * share;
+      return { ...s, width, brush: brush(s, width), from: round(s0), to: round(s1) };
+    }),
+  };
+});
+
+function round(n: number) {
+  return Math.round(n * 1e5) / 1e5;
+}
+---
+
+<section class="scene" data-scene data-kaizen-scene aria-label="Kaizen">
+  <div class="stage" data-stage>
+    <div class="pair" role="img" aria-label="改善, kaizen">
+      {
+        kanji.map((k) => (
+          <svg
+            class="kanji"
+            viewBox={`0 0 ${BOX} ${BOX}`}
+            aria-hidden="true"
+            data-char={k.char}
+            style={`--kend: ${k.end}`}
+          >
+            <defs>
+              {k.strokes.map((s) => (
+                <clipPath id={`${k.id}-zone-${s.n}`} clipPathUnits="userSpaceOnUse">
+                  <path d={s.zone} clip-rule="evenodd" />
+                </clipPath>
+              ))}
+              <mask id={`${k.id}-mask`} maskUnits="userSpaceOnUse" x="0" y="0" width={BOX} height={BOX}>
+                {k.strokes.map((s) => (
+                  <g clip-path={`url(#${k.id}-zone-${s.n})`}>
+                    <path
+                      class="brush"
+                      d={s.brush.d}
+                      stroke-width={s.width}
+                      stroke-dasharray={`${s.brush.total} ${s.brush.total}`}
+                      data-n={s.n}
+                      style={`--s: ${s.from}; --e: ${s.to}; --len: ${s.length}; --ext: ${s.brush.ext}; --total: ${s.brush.total}`}
+                    />
+                  </g>
+                ))}
+              </mask>
+            </defs>
+            <path class="guide" d={k.glyphD} />
+            <path class="ink" d={k.glyphD} mask={`url(#${k.id}-mask)`} />
+          </svg>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .scene {
+    --p: 0;
+    --ink: #1b1a17;
+    --guide: #d6cfbf;
+    height: 300svh;
+  }
+
+  .stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  /* Móvil: 改 encima de 善, ~260 px */
+  .pair {
+    --size: min(260px, 46svh, calc(100vw - 48px));
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Escritorio: uno al lado del otro, ~440 px cada uno */
+  @media (min-width: 960px) {
+    .pair {
+      --size: min(440px, 90svh, calc((100vw - 96px) / 2));
+      flex-direction: row;
+    }
+  }
+
+  .kanji {
+    display: block;
+    width: var(--size);
+    height: var(--size);
+    overflow: visible;
+  }
+
+  .guide {
+    fill: var(--guide);
+    /* Al terminar el kanji la guía desaparece: el resultado es solo el glifo. */
+    opacity: clamp(0, (var(--kend) - var(--p)) * 100000, 1);
+  }
+
+  .ink {
+    fill: var(--ink);
+  }
+
+  .brush {
+    /* Avance del trazo (0 → 1) dentro de su tramo de --p. */
+    --t: clamp(0, (var(--p) - var(--s)) / (var(--e) - var(--s)), 1);
+    /* 1 cuando el trazo ha terminado (p ≥ e: el último trazo acaba justo en p = 1). */
+    --done: clamp(0, (var(--p) - var(--e)) * 10000000 + 1, 1);
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+    /* Visible = prolongación inicial (al apoyar la pluma) + avance + prolongación final (al acabar). */
+    stroke-dashoffset: calc(
+      (var(--total) - var(--ext) - var(--len) * var(--t) - var(--ext) * var(--done)) * 1px
+    );
+    /* Un trazo no empezado no deja ni la prolongación inicial. */
+    stroke-opacity: clamp(0, (var(--p) - var(--s)) * 100000, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scene {
+      --p: 1 !important;
+      height: auto;
+    }
+    .stage {
+      position: relative;
+    }
+  }
+</style>
+
+<script>
+  import { getScene } from '../../scripts/scroll.ts';
+
+  const el = document.querySelector<HTMLElement>('[data-kaizen-scene]');
+  const scene = el && getScene(el);
+  if (el && scene && new URLSearchParams(location.search).has('debug')) {
+    import('../../scripts/kaizen-debug.ts').then(({ startDebug }) => startDebug(el, scene));
+  }
+</script>

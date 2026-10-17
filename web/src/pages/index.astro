@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Home from '../components/Home.astro';
+import { ui } from '../i18n/ui.ts';
+---
+
+<Layout title={ui.meta.title} description={ui.meta.description.text}>
+  <Home />
+</Layout>

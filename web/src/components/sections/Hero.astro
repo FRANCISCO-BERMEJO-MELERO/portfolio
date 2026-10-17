@@ -1,0 +1,11 @@
+---
+// 一 Inicio. Fase 1: solo el antetítulo y el nombre (oculto) como h1; el hero llega en la fase 2.
+import Section from '../Section.astro';
+import SectionHeading from '../SectionHeading.astro';
+import { site } from '../../data/site.ts';
+---
+
+<Section id="inicio">
+  <SectionHeading section="inicio" as="p" />
+  <h1 id="inicio-titulo" class="visually-hidden">{site.name}</h1>
+</Section>

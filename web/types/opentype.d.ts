@@ -24,6 +24,7 @@ declare module 'opentype.js' {
       unitsPerEm: number;
       tables: { hhea: { ascender: number; descender: number } };
       charToGlyph(char: string): Glyph;
+      hasChar(char: string): boolean;
     }
   }
   const opentype: { parse(buffer: ArrayBuffer | Uint8Array): opentype.Font };

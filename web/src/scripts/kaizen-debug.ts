@@ -1,6 +1,6 @@
 // Modo depuración (?debug): trazos de KanjiVG numerados, zonas de la partición,
 // slider de --p, grosor por trazo en vivo, copia de la configuración y auditoría.
-import type { ScrollProgress } from './scroll-progress.ts';
+import type { Scene } from './scroll.ts';
 import { kanjiGeometry } from '../generated/kanji-geometry.ts';
 import { brush } from '../lib/brush.ts';
 
@@ -61,7 +61,7 @@ const LAYER_CSS = `
   .scene[data-hide-masks] .debug-mask, .scene[data-hide-zones] .debug-zones { display: none }
 `;
 
-export function startDebug(scene: HTMLElement, progress: ScrollProgress) {
+export function startDebug(scene: HTMLElement, progress: Scene) {
   const css = document.createElement('style');
   css.textContent = LAYER_CSS;
   document.head.append(css);

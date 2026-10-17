@@ -3,9 +3,9 @@
 // Cada kanji es el glifo de Shippori (tinta) enmascarado por los trazos de KanjiVG,
 // que se «escriben» con stroke-dashoffset en función de --p (0 → 1). Cada trazo va
 // recortado por su zona del glifo (partición del build): no puede pintar fuera de ella.
-import { BOX, kanjiGeometry } from '../generated/kanji-geometry.ts';
-import { kanjiMasks } from '../data/kanji-masks.ts';
-import { brush } from '../lib/brush.ts';
+import { BOX, kanjiGeometry } from '../../generated/kanji-geometry.ts';
+import { kanjiMasks } from '../../data/kanji-masks.ts';
+import { brush } from '../../lib/brush.ts';
 
 const share = 1 / kanjiGeometry.length; // 改: 0 → 0,5 · 善: 0,5 → 1
 
@@ -40,8 +40,8 @@ function round(n: number) {
 }
 ---
 
-<section class="scene" data-kaizen-scene aria-label="Kaizen">
-  <div class="stage" data-kaizen-stage>
+<section class="scene" data-scene data-kaizen-scene aria-label="Kaizen">
+  <div class="stage" data-stage>
     <div class="pair" role="img" aria-label="改善, kaizen">
       {
         kanji.map((k) => (
@@ -160,14 +160,11 @@ function round(n: number) {
 </style>
 
 <script>
-  import { startScrollProgress } from '../scripts/scroll-progress.ts';
+  import { getScene } from '../../scripts/scroll.ts';
 
-  const scene = document.querySelector<HTMLElement>('[data-kaizen-scene]');
-  const stage = document.querySelector<HTMLElement>('[data-kaizen-stage]');
-  if (scene && stage) {
-    const progress = startScrollProgress(scene, stage);
-    if (new URLSearchParams(location.search).has('debug')) {
-      import('../scripts/debug.ts').then(({ startDebug }) => startDebug(scene, progress));
-    }
+  const el = document.querySelector<HTMLElement>('[data-kaizen-scene]');
+  const scene = el && getScene(el);
+  if (el && scene && new URLSearchParams(location.search).has('debug')) {
+    import('../../scripts/kaizen-debug.ts').then(({ startDebug }) => startDebug(el, scene));
   }
 </script>

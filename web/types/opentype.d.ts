@@ -14,6 +14,8 @@ declare module 'opentype.js' {
     }
     interface Path {
       commands: PathCommand[];
+      getBoundingBox(): BoundingBox;
+      toPathData(decimalPlaces?: number): string;
     }
     interface Glyph {
       advanceWidth: number;
@@ -25,6 +27,7 @@ declare module 'opentype.js' {
       tables: { hhea: { ascender: number; descender: number } };
       charToGlyph(char: string): Glyph;
       hasChar(char: string): boolean;
+      getPath(text: string, x: number, y: number, fontSize: number, options?: { letterSpacing?: number }): Path;
     }
   }
   const opentype: { parse(buffer: ArrayBuffer | Uint8Array): opentype.Font };

@@ -17,6 +17,7 @@ const range = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i)
 const LATIN = [...range(0x20, 0x7e), ...range(0xa0, 0xff)].join('');
 // Puntuación tipográfica y flechas de la interfaz (↓ ↑ ↗ → ←).
 const EXTRA = '–—‘’‚“”„…•‹›€−←↑→↓↗';
+const NO_SERIF = 'āēīōūĀĒĪŌŪ';
 // CJK: ideogramas, puntuación CJK y formas de ancho completo.
 const isCjk = (c: string) => /[　-〿぀-ヿ㐀-䶿一-鿿豈-﫿＀-￯]/u.test(c);
 
@@ -56,14 +57,18 @@ const errors: string[] = [];
 let total = 0;
 for (const face of FACES) {
   const source = await readFile(join('assets/fonts', face.file));
-  const text = LATIN + EXTRA + (face.cjk ? cjk.join('') : '');
+  // Lo latino del contenido fuera de Latin-1 (p. ej. «ō» de ensō) entra también en el subconjunto.
+  const text = LATIN + EXTRA + latinNeeded.join('') + (face.cjk ? cjk.join('') : '');
   const options = face.axes ? { variationAxes: face.axes } : {};
   // Se subconjunta a TTF para comprobar la cobertura y después a WOFF2 para servir.
   const ttf = await subsetFont(source, text, { ...options, targetFormat: 'truetype' });
   const font = opentype.parse(new Uint8Array(ttf).buffer);
   // Shippori (títulos) e Inter (texto) deben cubrir todo el contenido latino; Shippori, además, lo CJK.
   // Plex Mono solo pinta datos técnicos en ASCII, que ya van enteros en LATIN.
-  const must = face.cjk ? [...latinNeeded, ...cjk] : face.file.startsWith('Inter') ? latinNeeded : [];
+  // Shippori no tiene vocales con macrón (ō, ā, ū): solo pueden ir en texto de Inter o en nombres
+  // accesibles (el ensō, «Ensō, círculo zen…»), nunca en un título.
+  const serif = latinNeeded.filter((c) => !NO_SERIF.includes(c));
+  const must = face.cjk ? [...serif, ...cjk] : face.file.startsWith('Inter') ? latinNeeded : [];
   const missing = must.filter((c) => !font.hasChar(c));
   if (missing.length) errors.push(`${face.out}: sin glifo para ${missing.join(' ')}`);
   const woff2 = await subsetFont(source, text, { ...options, targetFormat: 'woff2' });

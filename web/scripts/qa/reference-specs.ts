@@ -12,6 +12,7 @@ export const TOKENS = {
     'text-2': '#6b665c',
     line: '#d6cfbf',
     accent: '#e2482a',
+    'accent-solid': '#c0391d',
     'on-accent': '#f3efe6',
     'accent-text': '#c0391d',
   },
@@ -22,6 +23,7 @@ export const TOKENS = {
     'text-2': '#8c8577',
     line: '#2e2a23',
     accent: '#f0573a',
+    'accent-solid': '#f0573a',
     'on-accent': '#15130f',
     'accent-text': '#f0573a',
   },
@@ -42,6 +44,10 @@ export type Spec = {
   state?: string;
   /** Tamaño de la caja sin transformar (offsetWidth / offsetHeight, o el rect en SVG). */
   box?: { width?: number; height?: number };
+  /** Posición en la ventana al cargar, sin scroll (getBoundingClientRect: incluye el giro). */
+  rect?: { x?: number; y?: number };
+  /** Medir con prefers-reduced-motion (el sello de la nav, que sin ello está en tránsito sobre el hero). */
+  reduced?: boolean;
   css?: Record<string, Expected>;
   /** Solo en este modo (por defecto, en los dos). */
   theme?: Theme;
@@ -49,6 +55,7 @@ export type Spec = {
 
 const t = (token: Token) => ({ token });
 const ROTATE_3 = 'matrix(0.99863, -0.052336, 0.052336, 0.99863, 0, 0)';
+const ROTATE_4 = 'matrix(0.997564, -0.0697565, 0.0697565, 0.997564, 0, 0)';
 const SERIF = /^"?Shippori Mincho"?/;
 const SANS = /^"?Inter"?/;
 
@@ -82,6 +89,7 @@ export const SPECS: Spec[] = [
     viewport: 'desktop',
     path: '/',
     qa: 'nav-hanko',
+    reduced: true,
     box: { width: 44, height: 44 },
     css: {
       'background-color': t('accent'),
@@ -177,6 +185,7 @@ export const SPECS: Spec[] = [
     viewport: 'mobile',
     path: '/',
     qa: 'nav-hanko',
+    reduced: true,
     box: { width: 36, height: 36 },
     css: {
       'background-color': t('accent'),
@@ -214,4 +223,163 @@ export const SPECS: Spec[] = [
     qa: 'heading-kanji',
     css: { 'font-family': SERIF, 'font-size': 26, 'font-weight': '400', color: t('accent-text') },
   },
+
+  // --- Inicio · escritorio (d-01; colores de d-03 en sumi). Posiciones medidas en Chrome sobre la
+  //     maqueta con las WOFF2 de la web (FTD fase 2). Botón principal: --accent-solid en vez del
+  //     #e2482a de la maqueta (F9). ---
+  { ref: 'd-01', viewport: 'desktop', path: '/', qa: 'heading', box: { height: 44 }, rect: { x: 96, y: 153 } },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero',
+    box: { width: 1440, height: 815 },
+    rect: { x: 0, y: 89 },
+    css: { 'padding-top': 64, 'padding-bottom': 40, 'padding-left': 96, 'padding-right': 96 },
+  },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-title',
+    box: { width: 704, height: 298 },
+    rect: { x: 96, y: 221 },
+    css: { 'font-family': SERIF, 'font-size': 152, 'font-weight': '600', 'line-height': 148.96, 'letter-spacing': -3.8, color: t('text') },
+  },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-role',
+    rect: { x: 96, y: 546.9 },
+    css: { 'font-family': SANS, 'font-size': 26, 'line-height': 37.7, color: t('text-2') },
+  },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-phrase',
+    box: { width: 680 },
+    rect: { x: 96, y: 602.6 },
+    css: { 'font-family': SERIF, 'font-size': 40, 'line-height': 54, 'max-width': 680, color: t('text') },
+  },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-cta',
+    box: { width: 199, height: 60 },
+    rect: { x: 96, y: 696.6 },
+    css: {
+      'padding-left': 32,
+      'padding-right': 32,
+      'font-size': 20,
+      'font-weight': '600',
+      'background-color': t('accent-solid'),
+      color: t('on-accent'),
+      'border-top-left-radius': 2,
+      'text-decoration-line': 'none',
+    },
+  },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-cta-alt',
+    box: { width: 153, height: 60 },
+    rect: { x: 310.9, y: 696.6 },
+    css: { 'font-size': 20, 'font-weight': '500', color: t('text'), 'border-top-width': 1, 'border-top-color': t('text'), 'border-top-left-radius': 2 },
+  },
+  { ref: 'd-01', viewport: 'desktop', path: '/', qa: 'hero-enso', box: { width: 480, height: 484 }, rect: { x: 864, y: 212.8 }, css: { color: t('text') } },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-hanko',
+    box: { width: 104, height: 104 },
+    rect: { x: 1217.3, y: 579.6 },
+    css: {
+      'background-color': t('accent'),
+      color: t('on-accent'),
+      'font-family': SERIF,
+      'font-size': 46,
+      'font-weight': '600',
+      'border-top-left-radius': 5,
+      'outline-width': 2,
+      'outline-color': t('on-accent'),
+      'outline-offset': -10,
+      transform: ROTATE_4,
+    },
+  },
+  {
+    ref: 'd-01',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'hero-foot',
+    box: { width: 1248, height: 67 },
+    rect: { x: 96, y: 796.6 },
+    css: { 'padding-top': 22, 'border-top-width': 1, 'border-top-color': t('line'), 'font-size': 17, color: t('text-2') },
+  },
+  { ref: 'd-01', viewport: 'desktop', path: '/', qa: 'hero-next', box: { height: 44 }, rect: { x: 1192.2 }, css: { color: t('accent-text') } },
+
+  // --- Inicio · móvil (m-01; colores de m-02 en sumi) ---
+  { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'heading', box: { height: 37 }, rect: { x: 24, y: 101 } },
+  {
+    ref: 'm-01',
+    viewport: 'mobile',
+    path: '/',
+    qa: 'hero',
+    box: { width: 390, height: 779 },
+    rect: { x: 0, y: 65 },
+    css: { 'padding-top': 28, 'padding-bottom': 20, 'padding-left': 24, 'padding-right': 24 },
+  },
+  { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'hero-enso', box: { width: 168, height: 168 }, rect: { x: 198, y: 93 } },
+  {
+    ref: 'm-01',
+    viewport: 'mobile',
+    path: '/',
+    qa: 'hero-hanko',
+    box: { width: 50, height: 50 },
+    rect: { x: 314.3, y: 209.3 },
+    css: {
+      'background-color': t('accent'),
+      color: t('on-accent'),
+      'font-size': 22,
+      'border-top-left-radius': 3,
+      'outline-width': 1.5,
+      'outline-offset': -5,
+      transform: ROTATE_4,
+    },
+  },
+  {
+    ref: 'm-01',
+    viewport: 'mobile',
+    path: '/',
+    qa: 'hero-title',
+    box: { width: 342, height: 128 },
+    rect: { x: 24, y: 281 },
+    css: { 'font-family': SERIF, 'font-size': 64, 'font-weight': '600', 'line-height': 64, 'letter-spacing': -1.6 },
+  },
+  { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'hero-role', rect: { y: 429 }, css: { 'font-size': 19, 'line-height': 27.55, color: t('text-2') } },
+  { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'hero-phrase', rect: { y: 468.5 }, css: { 'font-family': SERIF, 'font-size': 28, 'line-height': 37.8 } },
+  {
+    ref: 'm-01',
+    viewport: 'mobile',
+    path: '/',
+    qa: 'hero-cta',
+    box: { width: 342, height: 56 },
+    rect: { x: 24, y: 534.3 },
+    css: { 'font-size': 19, 'font-weight': '600', 'background-color': t('accent-solid'), color: t('on-accent') },
+  },
+  { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'hero-cta-alt', box: { width: 342, height: 56 }, rect: { y: 602.3 }, css: { 'font-size': 19, 'font-weight': '500' } },
+  {
+    ref: 'm-01',
+    viewport: 'mobile',
+    path: '/',
+    qa: 'hero-foot',
+    box: { height: 53 },
+    rect: { y: 771 },
+    css: { 'padding-top': 8, 'border-top-width': 1, 'border-top-color': t('line'), 'font-size': 15, color: t('text-2') },
+  },
+  { ref: 'm-01', viewport: 'mobile', path: '/', qa: 'hero-next', box: { height: 44 }, rect: { x: 286.3 } },
 ];

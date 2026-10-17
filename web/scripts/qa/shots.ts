@@ -1,8 +1,11 @@
 // pnpm qa:shots — capturas de la ventana en 1440 × 900 y 390 × 844 @3x: papel, sumi,
 // reduced motion y sin JS, en los estados de scroll pedidos.
 //   --path /            página
-//   --at 0,#proyectos   estados: fracción del scroll total (0–1) o un #ancla
+//   --at 0,200px,#x     estados: fracción del scroll total (0–1), píxeles de scroll (200px) o un #ancla
 //   --out dir           carpeta de salida (por defecto qa-output/shots)
+//   --wait ms           espera tras cargar, antes del primer estado (por defecto 1800: la carga
+//                       del hero, ensō + sello, dura 1,6 s)
+//   --widths 768,1024   anchos extra (papel; < 960 con el diseño móvil) para validar la escala intermedia
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { arg, run, sleep, type Theme, type ViewportName } from './lib.ts';
@@ -10,8 +13,10 @@ import { arg, run, sleep, type Theme, type ViewportName } from './lib.ts';
 const PATH = arg('path') ?? '/';
 const AT = (arg('at') ?? '0').split(',');
 const OUT = arg('out') ?? 'qa-output/shots';
+const WAIT = Number(arg('wait') ?? 1800);
+const WIDTHS = (arg('widths') ?? '').split(',').filter(Boolean).map(Number);
 
-type Variant = { viewport: ViewportName; theme: Theme; reduced?: boolean; nojs?: boolean };
+type Variant = { viewport: ViewportName; theme: Theme; reduced?: boolean; nojs?: boolean; width?: number };
 const VARIANTS: Variant[] = [
   { viewport: 'desktop', theme: 'papel' },
   { viewport: 'desktop', theme: 'sumi' },
@@ -21,6 +26,8 @@ const VARIANTS: Variant[] = [
   { viewport: 'mobile', theme: 'sumi', reduced: true },
   { viewport: 'desktop', theme: 'papel', nojs: true },
   { viewport: 'mobile', theme: 'papel', nojs: true },
+  // Tamaños sin maqueta: en vertical (768 × 1024) y en horizontal (1024 × 768).
+  ...WIDTHS.map((width): Variant => ({ viewport: width < 960 ? 'mobile' : 'desktop', theme: 'papel', width })),
 ];
 
 const slug = (s: string) => s.replace(/^[#/]+|\/+$/g, '').replace(/[^\w.-]+/g, '-') || 'inicio';
@@ -30,20 +37,26 @@ await run('qa:shots', async ({ url, browser }) => {
   for (const v of VARIANTS) {
     const page = await browser.newPage();
     await page.viewport(v.viewport);
+    if (v.width) {
+      const height = v.width < 960 ? Math.round((v.width * 4) / 3) : Math.round((v.width * 3) / 4);
+      await page.send('Emulation.setDeviceMetricsOverride', { width: v.width, height, deviceScaleFactor: 1, mobile: v.width < 960 });
+    }
     await page.media({ theme: v.theme, reduced: v.reduced ?? false });
     if (v.nojs) await page.send('Emulation.setScriptExecutionDisabled', { value: true });
     // Sin JS no corren requestAnimationFrame ni las promesas de la página: solo se espera a la carga.
     await page.goto(url + PATH, { settle: !v.nojs });
-    if (v.nojs) await sleep(500);
+    await sleep(v.nojs ? 500 : WAIT);
     for (const at of AT) {
       // Con JS desactivado, Runtime.evaluate sigue funcionando (solo se bloquean los scripts de la página).
       await page.evaluate(
         at.startsWith('#')
           ? `document.querySelector(${JSON.stringify(at)})?.scrollIntoView({ behavior: 'instant' })`
-          : `scrollTo({ top: Math.round(${Number(at)} * (document.documentElement.scrollHeight - innerHeight)), behavior: 'instant' })`,
+          : at.endsWith('px')
+            ? `scrollTo({ top: ${Number.parseFloat(at)}, behavior: 'instant' })`
+            : `scrollTo({ top: Math.round(${Number(at)} * (document.documentElement.scrollHeight - innerHeight)), behavior: 'instant' })`,
       );
       await sleep(300);
-      const name = `${slug(PATH)}-${v.viewport}-${v.theme}${v.reduced ? '-reduced' : ''}${v.nojs ? '-nojs' : ''}-${slug(at)}.png`;
+      const name = `${slug(PATH)}-${v.width ?? v.viewport}-${v.theme}${v.reduced ? '-reduced' : ''}${v.nojs ? '-nojs' : ''}-${slug(at)}.png`;
       writeFileSync(join(OUT, name), await page.screenshot());
       console.log(`  ${join(OUT, name)}`);
     }

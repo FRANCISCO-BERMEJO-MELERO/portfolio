@@ -22,6 +22,8 @@ const s = sections.find((x) => x.id === section)!;
     display: flex;
     gap: 12px;
     align-items: baseline;
+    /* Las maquetas no fijan interlineado: con el 1,5 de la web el encabezado mediría 1 px más. */
+    line-height: normal;
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.14em;

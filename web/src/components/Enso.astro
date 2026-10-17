@@ -1,0 +1,16 @@
+---
+// Ensō del hero (C12): se dibuja una vez al cargar, de 0,1 a 1,2 s (los 100 ms primeros dejan pasar
+// el arranque de la página, que en móvil lento daba fotogramas largos); después cae el sello (Nav.astro).
+// Sin JS o con reduced motion aparece ya dibujado. Toma el color del texto (--text).
+import InkStroke from './InkStroke.astro';
+import { enso } from '../data/ink/enso.ts';
+import { ui } from '../i18n/ui.ts';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<InkStroke id={id} viewBox={enso.viewBox} points={enso.points} widths={enso.widths} label={ui.hero.enso} draw={{ delay: 100, duration: 1100 }} />

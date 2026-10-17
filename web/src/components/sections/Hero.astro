@@ -1,11 +1,315 @@
 ---
-// 一 Inicio. Fase 1: solo el antetítulo y el nombre (oculto) como h1; el hero llega en la fase 2.
-import Section from '../Section.astro';
+// 一 Inicio (d-01, d-03, m-01, m-02): antetítulo, nombre, rol, frase, botones, ensō con el sello y pie.
+// - El ensō se dibuja al cargar y después cae el sello (C12). El sello que se ve cayendo y viajando
+//   es el de la nav (Nav.astro, scripts/hanko.ts); el de aquí es su sitio de salida y el que se ve
+//   quieto sin JS o con reduced motion (criterio 5).
+// - Móvil: el ensō arriba a la derecha, junto al antetítulo. Escritorio: a la derecha del texto.
+//   Entre 960 y 1440 px el título, la frase y el ensō escalan con el ancho (criterio 6).
+// - No usa Section.astro: el hero tiene sus propios márgenes y ocupa la pantalla bajo la nav.
 import SectionHeading from '../SectionHeading.astro';
+import Enso from '../Enso.astro';
+import Hanko from '../Hanko.astro';
 import { site } from '../../data/site.ts';
+import { splash } from '../../data/ink/enso.ts';
+import { sections, ui } from '../../i18n/ui.ts';
+
+const [first, ...rest] = site.name.split(' ');
+const contact = sections.find((s) => s.id === 'contacto')!;
 ---
 
-<Section id="inicio">
-  <SectionHeading section="inicio" as="p" />
-  <h1 id="inicio-titulo" class="visually-hidden">{site.name}</h1>
-</Section>
+<section id="inicio" class="hero" aria-labelledby="inicio-titulo" data-section data-qa="hero">
+  <div class="body" data-qa="hero-body">
+    <div class="kicker"><SectionHeading section="inicio" as="p" /></div>
+    <h1 id="inicio-titulo" class="title" data-qa="hero-title">{first}<br />{rest.join(' ')}</h1>
+    <p class="role" data-pending={site.role.pending} data-qa="hero-role">{site.role.text}</p>
+    <p class="phrase" data-pending={site.phrase.pending} data-qa="hero-phrase">{site.phrase.text}</p>
+    <div class="ctas">
+      <a class="cta main" href="#proyectos" data-qa="hero-cta">{ui.hero.cta.projects}</a>
+      <a class="cta alt" href={`#${contact.id}`} data-qa="hero-cta-alt">{ui.hero.cta.contact}</a>
+    </div>
+    <div class="enso" data-qa="hero-enso">
+      <Enso id="enso-hero" />
+      <div class="spot" data-qa="hero-spot">
+        <svg class="splash" viewBox={splash.viewBox} aria-hidden="true"><path d={splash.d}></path></svg>
+        <Hanko variant="hero" data-hanko-origin data-qa="hero-hanko" />
+      </div>
+    </div>
+  </div>
+  <div class="foot" data-qa="hero-foot">
+    <span>{site.location.text}</span>
+    <a class="next" href="#sobre-mi" data-qa="hero-next"
+      ><span class="prefix">{ui.hero.next.prefix}&nbsp;</span>{ui.hero.next.label}&nbsp;<span aria-hidden="true">↓</span></a
+    >
+  </div>
+</section>
+
+<style>
+  /* Móvil (m-01): ocupa la pantalla bajo la nav (64 px + 1 de borde) y deja el pie abajo. */
+  .hero {
+    min-height: calc(100svh - var(--nav-h) - 1px);
+    padding: 28px 24px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 168px;
+    grid-template-areas:
+      'kicker enso'
+      'title title'
+      'role role'
+      'phrase phrase'
+      'ctas ctas';
+    align-content: start;
+  }
+
+  .kicker {
+    grid-area: kicker;
+    padding-top: 8px;
+  }
+
+  .title {
+    grid-area: title;
+    margin-top: 20px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(44px, 17vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .role {
+    grid-area: role;
+    margin-top: 20px;
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--text-2);
+  }
+
+  .phrase {
+    grid-area: phrase;
+    margin-top: 12px;
+    font-family: var(--font-serif);
+    font-size: 28px;
+    line-height: 1.35;
+  }
+
+  .ctas {
+    grid-area: ctas;
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* Sin maqueta de tableta: los botones no se estiran más allá de 480 px. */
+    max-width: 480px;
+  }
+
+  .cta {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    text-decoration: none;
+    border-radius: 2px;
+  }
+
+  /* Texto sobre --accent-solid (F9): 4,76:1 en papel, 5,42:1 en sumi. */
+  .main {
+    background: var(--accent-solid);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+
+  .main:hover {
+    background: var(--accent-hover);
+    color: var(--on-accent);
+  }
+
+  .alt {
+    border: 1px solid var(--text);
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .alt:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .enso {
+    grid-area: enso;
+    position: relative;
+    width: 168px;
+    height: 168px;
+    color: var(--text);
+  }
+
+  /* Sitio del sello: abajo a la derecha del ensō. La mancha y el sello se centran en él. */
+  .spot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: var(--hanko-hero-size);
+    height: var(--hanko-hero-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .splash {
+    position: absolute;
+    inset: -40%;
+    width: 180%;
+    height: 180%;
+    max-width: none;
+    fill: var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .foot {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-size: 15px;
+    color: var(--text-2);
+  }
+
+  .next {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .prefix {
+    display: none;
+  }
+
+  /*
+   * Carga (C12): el ensō se dibuja en 0–1,2 s (Enso.astro); el sello cae en 1,2–1,58 s (Nav.astro) y
+   * la mancha aparece al tocar el papel y se va en 1,38–1,6 s. El sello de aquí no se ve: el que cae
+   * es el de la nav, que sale de este mismo sitio.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .spot :global(.hanko) {
+      visibility: hidden;
+    }
+
+    :global(html.js) .splash {
+      animation: hanko-splash 220ms cubic-bezier(0.2, 0.6, 0.3, 1) 1380ms backwards;
+    }
+  }
+
+  @keyframes hanko-splash {
+    0% {
+      opacity: 0;
+      transform: scale(0.55);
+    }
+    30% {
+      opacity: 0.32;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.15);
+    }
+  }
+
+  /* Escritorio (d-01): texto a la izquierda, ensō a la derecha centrado en vertical. */
+  @media (min-width: 960px) {
+    .hero {
+      --enso-w: clamp(320px, 33.3333vw, 480px);
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 64px var(--gutter) 40px;
+    }
+
+    .body {
+      flex: 1;
+      grid-template-columns: minmax(0, 1fr) var(--enso-w);
+      grid-template-areas:
+        'kicker enso'
+        'title enso'
+        'role enso'
+        'phrase enso'
+        'ctas enso';
+      column-gap: 64px;
+      align-content: center;
+    }
+
+    .kicker {
+      padding-top: 0;
+    }
+
+    .title {
+      margin-top: 24px;
+      /* 152 px a 1440 (d-01), proporcional al ancho por debajo. */
+      font-size: clamp(88px, 10.5556vw, 152px);
+      line-height: 0.98;
+    }
+
+    .role {
+      margin-top: 28px;
+      font-size: 26px;
+    }
+
+    .phrase {
+      margin-top: 18px;
+      max-width: 680px;
+      font-size: clamp(30px, 2.7778vw, 40px);
+    }
+
+    .ctas {
+      margin-top: 40px;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 16px;
+      max-width: none;
+    }
+
+    .cta {
+      display: inline-flex;
+      height: 60px;
+      padding: 0 32px;
+      font-size: 20px;
+    }
+
+    /* En d-01 la caja del ensō mide 480 × 484 (el SVG en línea deja 4 px debajo): se respeta para
+       que ensō y sello caigan en el mismo píxel. */
+    .enso {
+      align-self: center;
+      width: var(--enso-w);
+      height: auto;
+      aspect-ratio: auto;
+      padding-bottom: 4px;
+    }
+
+    .enso :global(.ink) {
+      height: auto;
+      aspect-ratio: 1;
+    }
+
+    .spot {
+      right: 4%;
+      bottom: 2%;
+    }
+
+    .foot {
+      margin-top: 40px;
+      padding-top: 22px;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 17px;
+    }
+
+    .prefix {
+      display: inline;
+    }
+  }
+</style>

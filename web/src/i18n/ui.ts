@@ -28,4 +28,10 @@ export const ui = {
     toSumi: 'Cambiar a modo oscuro',
     toPapel: 'Cambiar a modo claro',
   },
+  hero: {
+    enso: 'Ensō, círculo zen de un solo trazo',
+    cta: { projects: 'Ver proyectos', contact: 'Contacto' },
+    // «Seguir: Sobre mí ↓» en escritorio (d-01); en móvil, sin el prefijo (m-01).
+    next: { prefix: 'Seguir:', label: 'Sobre mí' },
+  },
 } as const;

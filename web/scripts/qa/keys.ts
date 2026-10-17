@@ -6,7 +6,7 @@ import { arg, open, run, THEMES, type ViewportName } from './lib.ts';
 const PATHS = (arg('paths') ?? '/').split(',');
 const MAX_TABS = 200;
 
-type Stop = { label: string; outline: string; hits: boolean[]; inView: boolean } | null;
+type Stop = { label: string; seen: boolean; outline: string; hits: boolean[]; inView: boolean } | null;
 
 await run('qa:keys', async ({ url, browser, fail }) => {
   for (const path of PATHS) {
@@ -20,6 +20,9 @@ await run('qa:keys', async ({ url, browser, fail }) => {
           const s = await page.evaluate<Stop>(`(async () => {
             const el = document.activeElement;
             if (!el || el === document.body) return null;
+            // La vuelta se detecta por elemento (dos enlaces pueden llamarse igual: «Contacto»).
+            const seen = el.hasAttribute('data-qa-tab');
+            el.setAttribute('data-qa-tab', '');
             await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
             const cs = getComputedStyle(el);
             const r = el.getBoundingClientRect();
@@ -28,10 +31,10 @@ await run('qa:keys', async ({ url, browser, fail }) => {
             const points = [[cx, cy], [cx - h, cy - h], [cx + h, cy - h], [cx - h, cy + h], [cx + h, cy + h]];
             const hits = points.map(([x, y]) => { const t = document.elementFromPoint(x, y); return !!t && (t === el || el.contains(t)); });
             const label = (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().replace(/\\s+/g, ' ').slice(0, 40);
-            return { label: el.tagName.toLowerCase() + ' «' + label + '»', outline: cs.outlineStyle + ' ' + cs.outlineWidth, hits, inView: r.bottom > 0 && r.top < innerHeight };
+            return { label: el.tagName.toLowerCase() + ' «' + label + '»', seen, outline: cs.outlineStyle + ' ' + cs.outlineWidth, hits, inView: r.bottom > 0 && r.top < innerHeight };
           })()`);
           if (!s) break;
-          if (stops.includes(s.label)) break;
+          if (s.seen) break;
           stops.push(s.label);
           const where = `${path} ${viewport} ${theme} · ${s.label}`;
           const [style, width] = s.outline.split(' ');

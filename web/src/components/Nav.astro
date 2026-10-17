@@ -1,16 +1,33 @@
 ---
-// Navegación fija (d-01 escritorio, m-01 móvil). El sello va fijo hasta que la fase 2 añada el
-// tránsito desde el hero (F4). En móvil no hay lista de enlaces hasta que llegue el menú (fase 8):
-// la lista existe, oculta, y nav.ts la sigue marcando.
+// Navegación fija (d-01 escritorio, m-01 móvil). En móvil no hay lista de enlaces hasta que llegue
+// el menú (fase 8): la lista existe, oculta, y nav.ts la sigue marcando.
+//
+// El sello (C3, C12, F10). Es un solo elemento: el de la nav. Sobre el hero, el CSS lo lleva al
+// sitio del sello del hero, a su tamaño (escala) y con su anillo, su giro y su letra; con el scroll
+// recorre la curva que pasa por d-02 y en p = 1 queda en su hueco sin transformar. Así no hay relevo
+// entre dos sellos que pueda verse (criterio 3). scripts/hanko.ts mide los dos sitios y el paso del
+// hero; el motor (scroll.ts) escribe --p. Al cargar cae sobre el ensō cuando este se ha dibujado.
+// Sin JS o con reduced motion se queda quieto en la nav y el del hero se ve quieto (criterio 5).
 import { sections, ui } from '../i18n/ui.ts';
 import { site } from '../data/site.ts';
+import Hanko from './Hanko.astro';
 import ThemeToggle from './ThemeToggle.astro';
 ---
 
-<header class="nav-header" data-qa="nav-header">
+<header class="nav-header" data-nav-header data-qa="nav-header">
   <nav class="nav" aria-label={ui.nav.label} data-qa="nav">
     <a class="home hit" href="#inicio" aria-label={ui.nav.home(site.hanko.text)} data-qa="nav-home">
-      <span class="hanko" aria-hidden="true" data-logo data-pending={site.hanko.pending} data-qa="nav-hanko">{site.hanko.text}</span>
+      <span
+        class="flight"
+        data-hanko-flight
+        data-scene="pass"
+        data-scene-track="#inicio"
+        data-scene-start="top nav"
+        data-scene-end="bottom nav"
+        data-qa="hanko-flight"
+      >
+        <span class="stamp"><Hanko variant="nav" data-qa="nav-hanko" /></span>
+      </span>
     </a>
     <ul class="links" data-qa="nav-list">
       {
@@ -31,6 +48,7 @@ import ThemeToggle from './ThemeToggle.astro';
 
 <script>
   import '../scripts/nav.ts';
+  import '../scripts/hanko.ts';
 </script>
 
 <style>
@@ -40,6 +58,10 @@ import ThemeToggle from './ThemeToggle.astro';
     z-index: 10;
     background: var(--bg);
     border-bottom: 1px solid var(--line);
+    /* El sello sale de la cabecera hacia el hero (abajo) y al caer empieza a escala 1,9 junto al borde
+       derecho: se recorta solo en horizontal, a lo ancho de la ventana. clip no crea un contenedor de
+       scroll, así que no afecta a sticky. */
+    overflow-x: clip;
   }
 
   /* Móvil (m-01): 64 px, sello a la izquierda, herramientas a la derecha. */
@@ -58,22 +80,76 @@ import ThemeToggle from './ThemeToggle.astro';
     text-decoration: none;
   }
 
-  .hanko {
-    width: 36px;
-    height: 36px;
+  .flight,
+  .stamp {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--accent);
-    color: var(--on-accent);
-    font-family: var(--font-serif);
-    font-weight: 600;
-    font-size: 16px;
-    letter-spacing: -0.02em;
-    border-radius: 3px;
-    outline: 1.5px solid var(--on-accent);
-    outline-offset: -4px;
-    transform: rotate(-3deg);
+  }
+
+  /* El sello no recibe clics: los recibe el enlace (su caja y su área de 46 px), esté donde esté. */
+  .flight {
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /*
+     * Tránsito. hanko.ts publica, para el centro del sello (px) y su escala respecto al de la nav:
+     *   --hk-k: p del punto d-02 · --hk-{x,y,s}0: valor en p = 0 respecto al hueco de la nav
+     *   --hk-{x,y,s}1: salto de p = 0 a d-02 · --hk-{x,y,s}2: salto de d-02 a p = 1
+     *   --hk-f{0,k,1}: tamaño de letra en cada estado respecto al de la nav
+     * --a y --b son el avance de cada tramo (0 → 1). Radio, anillo, separación y giro salen de los
+     * tokens de cada estado y se dividen por la escala para verse con su medida real.
+     */
+    :global(html.js) .flight[data-ready] {
+      --a: clamp(0, var(--p, 1) / var(--hk-k), 1);
+      --b: clamp(0, (var(--p, 1) - var(--hk-k)) / (1 - var(--hk-k)), 1);
+      --s: calc(var(--hk-s0) + var(--hk-s1) * var(--a) + var(--hk-s2) * var(--b));
+      --hanko-radius: calc(
+        (var(--hanko-hero-radius) + (var(--hanko-knot-radius) - var(--hanko-hero-radius)) * var(--a) +
+            (var(--hanko-nav-radius) - var(--hanko-knot-radius)) * var(--b)) / var(--s)
+      );
+      --hanko-ring: calc(
+        (var(--hanko-hero-ring) + (var(--hanko-knot-ring) - var(--hanko-hero-ring)) * var(--a) +
+            (var(--hanko-nav-ring) - var(--hanko-knot-ring)) * var(--b)) / var(--s)
+      );
+      --hanko-inset: calc(
+        (var(--hanko-hero-inset) + (var(--hanko-knot-inset) - var(--hanko-hero-inset)) * var(--a) +
+            (var(--hanko-nav-inset) - var(--hanko-knot-inset)) * var(--b)) / var(--s)
+      );
+      --hanko-rot: calc(
+        var(--hanko-hero-rot) + (var(--hanko-knot-rot) - var(--hanko-hero-rot)) * var(--a) +
+          (var(--hanko-nav-rot) - var(--hanko-knot-rot)) * var(--b)
+      );
+      --hanko-text-scale: calc(
+        (var(--hk-f0) + (var(--hk-fk) - var(--hk-f0)) * var(--a) + (var(--hk-f1) - var(--hk-fk)) * var(--b)) / var(--s)
+      );
+      transform: translate(
+          calc(var(--hk-x0) + var(--hk-x1) * var(--a) + var(--hk-x2) * var(--b)),
+          calc(var(--hk-y0) + var(--hk-y1) * var(--a) + var(--hk-y2) * var(--b))
+        )
+        scale(var(--s));
+    }
+
+    /* Caída al cargar (C12): grande, girado y transparente → apretado contra el papel → quieto.
+       Empieza cuando termina el ensō (1,2 s) y acaba a 1,58 s. */
+    :global(html.js) .stamp {
+      animation: hanko-stamp 380ms cubic-bezier(0.3, 0, 0.2, 1) 1200ms backwards;
+    }
+  }
+
+  @keyframes hanko-stamp {
+    0% {
+      opacity: 0;
+      transform: scale(1.9) rotate(-12deg);
+    }
+    50% {
+      opacity: 1;
+    }
+    70% {
+      transform: scale(0.94) rotate(0.5deg);
+    }
+    100% {
+      transform: none;
+    }
   }
 
   .links {
@@ -112,13 +188,6 @@ import ThemeToggle from './ThemeToggle.astro';
 
     .home {
       margin-right: 0;
-    }
-
-    .hanko {
-      width: 44px;
-      height: 44px;
-      font-size: 19px;
-      outline-offset: -5px;
     }
 
     .links {

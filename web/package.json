@@ -7,9 +7,10 @@
     "assets": "node scripts/fetch-assets.ts",
     "glyphs": "node scripts/build-glyphs.ts",
     "fonts": "node scripts/subset-fonts.ts",
-    "predev": "pnpm assets && pnpm glyphs && pnpm fonts",
+    "favicon": "node scripts/favicon.ts",
+    "predev": "pnpm assets && pnpm glyphs && pnpm fonts && pnpm favicon",
     "dev": "astro dev",
-    "prebuild": "pnpm assets && pnpm glyphs && pnpm fonts",
+    "prebuild": "pnpm assets && pnpm glyphs && pnpm fonts && pnpm favicon",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
@@ -24,7 +25,9 @@
     "qa:theme": "node scripts/qa/theme.ts",
     "qa:perf": "node scripts/qa/perf.ts",
     "qa:kaizen": "node scripts/qa/kaizen.ts",
-    "qa:weight": "node scripts/qa/weight.ts"
+    "qa:weight": "node scripts/qa/weight.ts",
+    "qa:hanko": "node scripts/qa/hanko.ts",
+    "qa:hero": "node scripts/qa/hero.ts"
   },
   "dependencies": {
     "astro": "7.3.5"

@@ -2,7 +2,8 @@
  * Tokens de los dos modos (plan §1.5). Papel es el claro y sumi el oscuro.
  * - Con JS, el script del <head> pone data-theme en <html> antes del primer pintado.
  * - Sin JS, manda prefers-color-scheme (el bloque @media).
- * Contraste: --on-accent sobre --accent en papel da 3,52:1 → solo texto ≥ 18,66 px en negrita o ≥ 24 px.
+ * Contraste: --on-accent sobre --accent en papel da 3,52:1 → solo para el sello (logotipo, F6).
+ * El texto sobre relleno (botón principal) va sobre --accent-solid: 4,76:1 en papel (fase 2, F9).
  */
 :root,
 :root[data-theme='papel'] {
@@ -13,6 +14,7 @@
   --text-2: #6b665c;
   --line: #d6cfbf;
   --accent: #e2482a;
+  --accent-solid: #c0391d;
   --on-accent: #f3efe6;
   --accent-text: #c0391d;
   --accent-text-surface: #b4351b;
@@ -32,6 +34,7 @@
     --text-2: #8c8577;
     --line: #2e2a23;
     --accent: #f0573a;
+    --accent-solid: #f0573a;
     --on-accent: #15130f;
     --accent-text: #f0573a;
     --accent-text-surface: #f0573a;
@@ -48,6 +51,7 @@
   --text-2: #8c8577;
   --line: #2e2a23;
   --accent: #f0573a;
+  --accent-solid: #f0573a;
   --on-accent: #15130f;
   --accent-text: #f0573a;
   --accent-text-surface: #f0573a;
@@ -61,11 +65,49 @@
   /* Margen lateral: 24 px en móvil; en escritorio crece de 32 px (960) a 96 px (1440), como las maquetas. */
   --gutter: 24px;
   --max-w: 1440px;
+
+  /*
+   * Sello (hanko) en sus tres estados: sobre el ensō (m-01 / d-01), en tránsito (d-02) y en la nav
+   * (m-06 / d-07). Tamaño, letra, radio, anillo, separación del anillo al borde y giro.
+   * El tránsito interpola entre ellos (Nav.astro). En móvil no hay maqueta del tránsito: el estado
+   * intermedio está en la misma fracción del recorrido que d-02 en escritorio (32/60 del tamaño).
+   */
+  --hanko-hero-size: 50px;
+  --hanko-hero-font: 22px;
+  --hanko-hero-radius: 3px;
+  --hanko-hero-ring: 1.5px;
+  --hanko-hero-inset: 5px;
+  --hanko-hero-rot: -4deg;
+  --hanko-knot-size: 42.53px;
+  --hanko-knot-font: 18.8px;
+  --hanko-knot-radius: 3px;
+  --hanko-knot-ring: 1.5px;
+  --hanko-knot-inset: 4.47px;
+  --hanko-knot-rot: -3.5deg;
+  --hanko-nav-size: 36px;
+  --hanko-nav-font: 16px;
+  --hanko-nav-radius: 3px;
+  --hanko-nav-ring: 1.5px;
+  --hanko-nav-inset: 4px;
+  --hanko-nav-rot: -3deg;
 }
 
 @media (min-width: 960px) {
   :root {
     --nav-h: 88px;
     --gutter: clamp(32px, 13.3333vw - 96px, 96px);
+
+    --hanko-hero-size: 104px;
+    --hanko-hero-font: 46px;
+    --hanko-hero-radius: 5px;
+    --hanko-hero-ring: 2px;
+    --hanko-hero-inset: 10px;
+    --hanko-knot-size: 72px;
+    --hanko-knot-font: 32px;
+    --hanko-knot-radius: 4px;
+    --hanko-knot-inset: 7px;
+    --hanko-nav-size: 44px;
+    --hanko-nav-font: 19px;
+    --hanko-nav-inset: 5px;
   }
 }

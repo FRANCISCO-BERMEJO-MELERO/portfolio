@@ -9,7 +9,8 @@
 //   nav (el borde inferior de la navegación fija).
 // - data-scene-track="<selector>" mide otro elemento: el progreso sale de él y --p se escribe en la
 //   escena (así el sello de la nav sigue el paso del hero).
-// - data-steps="n" escribe además data-step="k" (0 … n−1) en la escena.
+// - data-steps="n" escribe además data-step="k" (0 … n−1) en la escena y, al cambiar, lanza en ella
+//   el evento «scenestep» (detail = k).
 // - Un solo listener de scroll y un requestAnimationFrame para todas; solo se recalculan las
 //   escenas cerca de la ventana (IntersectionObserver). Las medidas se cachean (carga, cambios de
 //   tamaño de la escena o de body, ventana y fuentes): en el scroll solo se lee scrollY.
@@ -81,6 +82,7 @@ function createScene(el: HTMLElement): Entry {
       if (k !== step) {
         step = k;
         el.dataset['step'] = String(k);
+        el.dispatchEvent(new CustomEvent('scenestep', { detail: k }));
       }
     }
   };

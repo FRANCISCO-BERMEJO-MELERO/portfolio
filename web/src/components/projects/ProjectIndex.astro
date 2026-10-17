@@ -1,0 +1,121 @@
+---
+// Índice de proyectos: lista lateral con kanji y nombre en escritorio (d-07) y pestañas 一–五 en
+// móvil (m-06). Son enlaces a cada panel; scripts/projects.ts los lleva a su tramo (o a su sitio en
+// el carrusel) y marca aria-current en el del panel que se ve. Sin JS, el primero.
+// Las pestañas de m-06 atenúan las inactivas con opacidad 0,55 y no llegan a 3:1: van en --text-2
+// (decisión F24, como F17 en Sobre mí).
+import { projects } from '../../data/projects.ts';
+import { ui } from '../../i18n/ui.ts';
+---
+
+<nav class="index" aria-label={ui.projects.index} data-qa="projects-index">
+  <ol class="list">
+    {
+      projects.map((p, i) => (
+        <li class="item">
+          <a class="link" href={`#${p.id}`} aria-current={i === 0 ? 'true' : undefined} data-project-link data-qa="projects-link">
+            <span class="kanji" aria-hidden="true" data-qa="projects-link-kanji">
+              {p.index}
+            </span>
+            <span class="name">{p.name}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  /* Móvil (m-06): cinco pestañas de 52 × 52 repartidas, con el filete de la activa. */
+  .list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .link {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 26px;
+    line-height: normal;
+    color: var(--text-2);
+    text-decoration: none;
+  }
+
+  .link[aria-current] {
+    color: var(--accent-text);
+    border-bottom: 2px solid var(--text);
+  }
+
+  .name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Escritorio (d-07): lista de 200 px con filetes; la activa en --text y peso 500. */
+  @media (min-width: 960px) {
+    .index {
+      flex: none;
+      width: var(--index-w, 200px);
+    }
+
+    .list {
+      flex-direction: column;
+      justify-content: flex-start;
+      border-bottom: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .item {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .link,
+    .link[aria-current] {
+      width: auto;
+      height: auto;
+      justify-content: flex-start;
+      align-items: baseline;
+      gap: 14px;
+      padding: 16px 0;
+      font-family: var(--font-sans);
+      font-size: 18px;
+      color: var(--text-2);
+      border-bottom: 0;
+    }
+
+    .link[aria-current] {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .link:hover {
+      color: var(--text);
+    }
+
+    .kanji {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--accent-text);
+    }
+
+    .name {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+    }
+  }
+</style>

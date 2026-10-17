@@ -1,0 +1,87 @@
+---
+// Marco de terminal (d-07, m-06): barra con el título, el contenido (slot) y el pie de captura,
+// con los colores --term-*. El contenido es texto real (la TUI de Chainview, fase 7).
+// En móvil la maqueta no lleva pie: se mantiene para los lectores de pantalla, oculto a la vista.
+import type { Text } from '../../lib/pending.ts';
+
+interface Props {
+  title: string;
+  caption: Text;
+}
+
+const { title, caption } = Astro.props;
+---
+
+<figure class="tui" data-qa="tui">
+  <div class="bar" data-qa="tui-bar">{title}</div>
+  <div class="screen" data-qa="tui-screen"><slot /></div>
+  <figcaption class="caption" data-pending={caption.pending} data-qa="tui-caption">{caption.text}</figcaption>
+</figure>
+
+<style>
+  .tui {
+    display: flex;
+    flex-direction: column;
+    height: 182px;
+    background: var(--term-bg);
+    color: var(--term-text-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: normal;
+  }
+
+  .bar {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--term-line);
+  }
+
+  .screen {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 960px) {
+    .tui {
+      height: auto;
+      font-size: 15px;
+    }
+
+    .bar {
+      padding: 12px 16px;
+    }
+
+    .screen {
+      padding: 24px;
+      line-height: 1.6;
+    }
+
+    .caption {
+      position: static;
+      width: auto;
+      height: auto;
+      clip-path: none;
+      white-space: normal;
+      padding: 12px 16px;
+      border-top: 1px solid var(--term-line);
+      font-family: var(--font-sans);
+      font-size: 14px;
+    }
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+// Borde de un panel shoji con su celosía (d-07, m-06). Decorativo: aria-hidden.
+// - Escritorio: el borde izquierdo del panel siguiente (96 px), con su índice arriba. Va dentro de
+//   ese panel: asoma por la derecha mientras se ve el anterior y se desvanece al entrar.
+// - Móvil: una franja fija de 18 px a la derecha del carrusel, sin índice, que tapa el borde del
+//   panel siguiente.
+interface Props {
+  index?: string;
+  narrow?: boolean;
+}
+
+const { index, narrow = false } = Astro.props;
+const columns = narrow ? ['50%'] : ['33%', '66%'];
+const rows = [1, 2, 3, 4, 5, 6, 7].map((i) => `${i * 12.5}%`);
+---
+
+<div class:list={['edge', { narrow }]} aria-hidden="true" data-qa={narrow ? 'shoji-edge-m' : 'shoji-edge'}>
+  <svg width="100%" height="100%">
+    {columns.map((x) => <line x1={x} y1="0" x2={x} y2="100%" />)}
+    {rows.map((y) => <line x1="0" y1={y} x2="100%" y2={y} />)}
+  </svg>
+  {index && <span class="index" data-qa="shoji-index">{index}</span>}
+</div>
+
+<style>
+  .edge {
+    position: absolute;
+    width: 96px;
+    background: var(--surface);
+    border: 1px solid var(--text);
+  }
+
+  .edge.narrow {
+    width: 18px;
+  }
+
+  line {
+    stroke: var(--line);
+    stroke-width: 1;
+  }
+
+  .index {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    padding: 6px 0;
+    background: var(--surface);
+    font-family: var(--font-serif);
+    font-size: 28px;
+    line-height: normal;
+    text-align: center;
+    color: var(--accent-text-surface);
+  }
+</style>

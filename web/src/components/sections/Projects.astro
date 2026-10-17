@@ -1,9 +1,258 @@
 ---
-// 三 Proyectos. Fase 1: solo el encabezado; el contenido llega en la fase 4.
+// 三 Proyectos (d-07, d-08, m-06, m-07): índice y paneles shoji. Tres modos, todos con el mismo HTML:
+// - Escenario (escritorio ≥ 960 × 700, con JS y movimiento): escena sticky de cinco tramos
+//   (data-steps="5"). El panel j entra desde la derecha sobre el anterior en torno al límite j/5;
+//   antes de entrar asoma su borde shoji (96 px) a la derecha. El índice marca el del tramo.
+// - Carrusel (móvil, con JS y movimiento): scroll-snap horizontal nativo; la franja shoji fija de la
+//   derecha tapa el borde del panel siguiente (18 px).
+// - Apilado (reduced motion, sin JS, escritorio de menos de 700 px de alto): los cinco paneles
+//   en flujo normal. En escritorio el índice se queda pegado a la izquierda.
+// scripts/projects.ts sincroniza el índice, las anclas (#chainview…) y el foco del teclado.
 import Section from '../Section.astro';
 import SectionHeading from '../SectionHeading.astro';
+import ProjectIndex from '../projects/ProjectIndex.astro';
+import ProjectPanel from '../projects/ProjectPanel.astro';
+import ShojiEdge from '../projects/ShojiEdge.astro';
+import { projects } from '../../data/projects.ts';
+import { ui } from '../../i18n/ui.ts';
 ---
 
-<Section id="proyectos">
-  <SectionHeading section="proyectos" />
+<Section id="proyectos" flush>
+  <div class="scene" data-scene data-steps={projects.length} data-projects-scene data-qa="projects-scene" style={`--n: ${projects.length}`}>
+    <div class="stage" data-stage data-qa="projects-stage">
+      <SectionHeading section="proyectos" />
+      <div class="body">
+        <ProjectIndex />
+        <div class="deck" data-deck data-qa="projects-deck">
+          <div class="track" data-track data-qa="projects-track">
+            {projects.map((project, i) => <ProjectPanel project={project} i={i} />)}
+          </div>
+          <ShojiEdge narrow />
+        </div>
+        <p class="swipe" aria-hidden="true" data-qa="projects-swipe">{ui.projects.swipe} →</p>
+      </div>
+    </div>
+  </div>
 </Section>
+
+<style>
+  /* --- Común: apilado (sin JS, reduced motion) y medidas de móvil (m-06) --- */
+  .scene {
+    --p: 1;
+  }
+
+  .stage {
+    padding: 28px 0 32px;
+  }
+
+  .body {
+    margin-top: 20px;
+  }
+
+  .deck {
+    position: relative;
+    margin-top: 24px;
+    padding: 14px 0;
+    border-block: 2px solid var(--text);
+  }
+
+  .track {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .deck > :global(.edge),
+  .swipe {
+    display: none;
+  }
+
+  /* --- Carrusel (móvil con JS y movimiento) --- */
+  @media (max-width: 959px) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .track {
+      flex-direction: row;
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    /* El último panel también llega al borde izquierdo: deja al final el hueco de la franja. */
+    :global(html.js) .track::after {
+      content: '';
+      flex: 0 0 18px;
+    }
+
+    :global(html.js) .track > :global(.panel) {
+      flex: 0 0 calc(100% - 26px);
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    :global(html.js) .deck > :global(.edge) {
+      display: block;
+      top: 14px;
+      bottom: 14px;
+      right: 0;
+    }
+
+    :global(html.js) .deck[data-last] > :global(.edge) {
+      display: none;
+    }
+
+    :global(html.js) .swipe {
+      display: block;
+      margin-top: 14px;
+      font-size: 14px;
+      line-height: normal;
+      color: var(--text-2);
+    }
+  }
+
+  /* --- Escritorio --- */
+  @media (min-width: 960px) {
+    .stage {
+      padding: 48px 0;
+    }
+
+    .body {
+      /* Entre 960 y 1200 px el índice cede ancho al panel. */
+      --index-w: 200px;
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+      margin-top: 32px;
+    }
+
+    .deck {
+      flex: 1;
+      min-width: 0;
+      margin-top: 0;
+      padding: 20px 0;
+      container: deck / inline-size;
+    }
+
+    .track {
+      gap: 20px;
+    }
+
+    /* Apilado: el índice acompaña a los paneles. */
+    .body > :global(.index) {
+      position: sticky;
+      top: calc(var(--nav-h) + 24px);
+    }
+  }
+
+  @media (min-width: 960px) and (max-width: 1199px) {
+    .body {
+      --index-w: 160px;
+      gap: 32px;
+    }
+  }
+
+  /* Escritorio de poca altura: márgenes menores (con el panel compacto de ProjectPanel, F25). */
+  @media (min-width: 960px) and (max-height: 860px) {
+    .stage {
+      padding: 32px 0;
+    }
+
+    .body {
+      margin-top: 24px;
+    }
+
+    .deck {
+      padding: 12px 0;
+    }
+  }
+
+  /* --- Escenario (escritorio ≥ 700 px de alto, con JS y movimiento) --- */
+  @media (min-width: 960px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .scene {
+      --p: 0;
+      /* El escenario y un tramo de 70 % de pantalla por proyecto. */
+      height: calc(100svh - var(--nav-h) - 1px + var(--n) * 70svh);
+    }
+
+    :global(html.js) .stage {
+      position: sticky;
+      top: calc(var(--nav-h) + 1px);
+      height: calc(100svh - var(--nav-h) - 1px);
+      display: flex;
+      flex-direction: column;
+      overflow: clip;
+    }
+
+    :global(html.js) .body {
+      flex: 1;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    :global(html.js) .body > :global(.index) {
+      position: static;
+    }
+
+    :global(html.js) .deck {
+      /* clip y no hidden: el foco en un panel fuera de la vista no puede desplazar el mazo. */
+      overflow: clip;
+    }
+
+    :global(html.js) .track {
+      position: relative;
+      height: 100%;
+    }
+
+    /*
+     * Panel j (0 … n−1): entra en torno a p = j/n, en un tramo de 2h; el siguiente asoma a la vez.
+     * e = avance de su entrada; q = avance de su asomo (durante la entrada del anterior).
+     * x = fuera (ancho del mazo) − asomo (96 px) − entrada (hasta 0). En % del propio panel, que mide
+     * el mazo − 112 px: fuera = 100 % + 112 px, asomado = 100 % + 16 px.
+     */
+    :global(html.js) .track > :global(.panel) {
+      --h: 0.06;
+      --e: clamp(0, (var(--p) - var(--j) / var(--n) + var(--h)) / (2 * var(--h)), 1);
+      --q: clamp(0, (var(--p) - (var(--j) - 1) / var(--n) + var(--h)) / (2 * var(--h)), 1);
+      position: absolute;
+      inset: 0 auto 0 0;
+      z-index: var(--j);
+      width: calc(100% - 112px);
+      translate: calc((1 - var(--e)) * (100% + 16px) + (1 - var(--q)) * 96px) 0;
+    }
+
+    /* El primero está siempre; el segundo asoma desde el principio. */
+    :global(html.js) .track > :global(.panel:first-child) {
+      --e: 1;
+      --q: 1;
+    }
+
+    :global(html.js) .track > :global(.panel:nth-child(2)) {
+      --q: 1;
+    }
+
+    /* Su borde shoji tapa el lado izquierdo (con el filete) y se desvanece en el primer tercio de la entrada. */
+    :global(html.js) .track > :global(.panel) > :global(.edge) {
+      display: block;
+      top: -1px;
+      bottom: -1px;
+      left: -1px;
+      z-index: 1;
+      opacity: clamp(0, 1 - var(--e) * 3, 1);
+    }
+  }
+
+  /* Paneles estrechos (escritorio entre 960 y ~1250 px): captura y texto a partes iguales y nombre menor. */
+  @container deck (width < 860px) {
+    .track > :global(.panel) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .track > :global(.panel) :global(.name) {
+      font-size: 44px;
+    }
+  }
+</style>
+
+<script>
+  import '../../scripts/projects.ts';
+</script>

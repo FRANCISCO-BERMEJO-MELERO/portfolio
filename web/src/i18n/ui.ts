@@ -47,4 +47,12 @@ export const ui = {
     result: '= cambiar a mejor',
     facts: ['Base', 'Foco', 'Ahora'],
   },
+  projects: {
+    index: 'Índice de proyectos',
+    stack: 'Stack',
+    repo: 'Repositorio',
+    demo: 'Demo',
+    // Solo en móvil, bajo el carrusel (m-06).
+    swipe: 'Desliza para abrir el siguiente panel',
+  },
 } as const;

@@ -1,0 +1,359 @@
+---
+// Panel de un proyecto (d-07, m-06): índice, nombre, línea, captura, problema, stack, dato y enlaces.
+// - Escritorio: la captura a la izquierda (7/12 del ancho, como el flex 7 : 5 de la maqueta) y el
+//   texto a la derecha, con los enlaces al pie.
+// - Móvil: una columna (nombre, línea, captura, problema, stack, dato, enlaces), sin el índice.
+// El orden del HTML es el de lectura (el nombre antes que la captura); en escritorio la rejilla
+// lleva la captura a la columna izquierda. Los paneles de escritorio, desde el segundo, llevan su
+// borde shoji (ShojiEdge) para asomar a la derecha del anterior. El movimiento lo pone Projects.astro.
+import { Picture } from 'astro:assets';
+import type { Project } from '../../data/projects.ts';
+import { ui } from '../../i18n/ui.ts';
+import ShojiEdge from './ShojiEdge.astro';
+import TuiFrame from './TuiFrame.astro';
+
+interface Props {
+  project: Project;
+  /** Posición (0 …): el primero no lleva borde shoji y su captura no es diferida. */
+  i: number;
+}
+
+const { project: p, i } = Astro.props;
+const titleId = `${p.id}-titulo`;
+// Un enlace pendiente lleva a su propio panel (como el «#repo» de las maquetas) y queda marcado.
+const links = [
+  { label: ui.projects.repo, value: p.repo },
+  { label: ui.projects.demo, value: p.demo },
+].map((l) => ({ ...l, href: l.value.pending ? `#${p.id}` : l.value.text }));
+const { shot } = p;
+// Mientras falte el stack, huecos hasta el mínimo de tres (como los «[tecnología]» de las maquetas).
+const todo = p.stackTodo ? Array.from({ length: Math.max(1, 3 - p.stack.length) }, () => p.stackTodo!) : [];
+---
+
+<article id={p.id} class="panel" aria-labelledby={titleId} data-project-panel data-qa="project-panel" style={`--j: ${i}`}>
+  {i > 0 && <ShojiEdge index={p.index} />}
+  <p class="number" aria-hidden="true" data-qa="project-number">{p.index}</p>
+  <h3 class="name" id={titleId} data-qa="project-name">{p.name}</h3>
+  <p class="summary" data-pending={p.summary.pending} data-qa="project-summary">{p.summary.text}</p>
+  {
+    shot.kind === 'tui' ? (
+      <TuiFrame title={shot.title} caption={p.caption}>
+        <span data-pending={shot.body.pending}>{shot.body.text}</span>
+      </TuiFrame>
+    ) : (
+      <figure class="shot" data-qa="project-shot">
+        {shot.src ? (
+          <Picture
+            class="image"
+            src={shot.src}
+            alt={shot.alt.text}
+            formats={['avif', 'webp']}
+            widths={[480, 960, 1440]}
+            sizes="(min-width: 960px) 40vw, 90vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ) : (
+          <div class="placeholder" data-pending={shot.alt.pending}>
+            {shot.alt.text}
+          </div>
+        )}
+        <figcaption class="caption" data-pending={p.caption.pending}>
+          {p.caption.text}
+        </figcaption>
+      </figure>
+    )
+  }
+  <p class="problem" data-pending={p.problem.pending} data-qa="project-problem">{p.problem.text}</p>
+  <ul class="stack" aria-label={ui.projects.stack} data-qa="project-stack">
+    {
+      p.stack.map((name) => (
+        <li class="tech" data-qa="project-tech">
+          {name}
+        </li>
+      ))
+    }
+    {
+      todo.map((t) => (
+        <li class="tech todo" data-pending={t.pending} data-qa="project-tech-todo">
+          {t.text}
+        </li>
+      ))
+    }
+  </ul>
+  <p class="fact" data-pending={p.fact.pending} data-qa="project-fact">{p.fact.text}</p>
+  <div class="links" data-qa="project-links">
+    {
+      links.map((l) => (
+        <a class="link" href={l.href} data-pending={l.value.pending} data-qa="project-link">
+          {l.label} ↗
+        </a>
+      ))
+    }
+  </div>
+</article>
+
+<style>
+  /* Móvil (m-06). */
+  .panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    line-height: normal;
+  }
+
+  .panel > :global(.edge),
+  .number {
+    display: none;
+  }
+
+  .name {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .summary {
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text-2);
+  }
+
+  .panel > :global(figure) {
+    margin-top: 18px;
+  }
+
+  .shot {
+    display: flex;
+    flex-direction: column;
+    height: 182px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    color: var(--text-2);
+  }
+
+  .placeholder {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* <Picture> envuelve la imagen en <picture>: es él quien ocupa el hueco, y la imagen lo llena sin
+     imponer su alto (la captura se recorta desde arriba a la izquierda). */
+  .shot :global(picture) {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .shot :global(.image) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+  }
+
+  .caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .problem {
+    margin-top: 18px;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .stack {
+    list-style: none;
+    margin-top: 16px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+  }
+
+  .tech {
+    padding: 6px 10px;
+    border: 1px solid var(--text);
+    border-radius: 2px;
+  }
+
+  .tech.todo {
+    border-color: var(--line);
+    color: var(--text-2);
+  }
+
+  .fact {
+    margin-top: 16px;
+    font-family: var(--font-serif);
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .links {
+    margin-top: 12px;
+    display: flex;
+    gap: 24px;
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent-text-surface);
+    text-underline-offset: 5px;
+  }
+
+  .link:hover {
+    color: var(--accent-hover);
+  }
+
+  /* Escritorio (d-07): rejilla de captura (7/12 del ancho sin el hueco, más su borde) y texto. */
+  @media (min-width: 960px) {
+    .panel {
+      display: grid;
+      grid-template-columns: calc((100% - 42px) * 7 / 12 + 2px) minmax(0, 1fr);
+      grid-template-rows: repeat(6, auto) 1fr;
+      column-gap: 40px;
+      padding: 36px;
+    }
+
+    /* :global: el selector con ámbito pesaría más que el de la captura y la sacaría de su columna.
+       El borde shoji no: un hijo absoluto con columna toma esa columna como bloque contenedor. */
+    .panel > :global(:where(:not(.edge))) {
+      grid-column: 2;
+    }
+
+    .panel > :global(figure) {
+      grid-column: 1;
+      grid-row: 1 / -1;
+      height: auto;
+      margin-top: 0;
+    }
+
+    .number {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 44px;
+      line-height: 1;
+      color: var(--accent-text-surface);
+    }
+
+    .name {
+      margin-top: 16px;
+      font-size: 60px;
+    }
+
+    .summary {
+      margin-top: 10px;
+      font-size: 19px;
+      line-height: 1.5;
+    }
+
+    .placeholder {
+      padding: 24px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .caption {
+      position: static;
+      width: auto;
+      height: auto;
+      clip-path: none;
+      white-space: normal;
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .problem {
+      margin-top: 24px;
+      font-size: 20px;
+      line-height: 1.55;
+    }
+
+    .stack {
+      margin-top: 24px;
+      font-size: 15px;
+    }
+
+    .tech {
+      padding: 6px 12px;
+    }
+
+    .fact {
+      margin-top: 24px;
+      font-size: 26px;
+    }
+
+    .links {
+      align-self: end;
+      gap: 28px;
+      margin-top: 0;
+      font-size: 18px;
+    }
+  }
+
+  /* Escritorio de poca altura (≤ 860 px, p. ej. 1280 × 720): el panel compacto para que quepa en el
+     escenario (decisión F25): sin el índice (ya está en la lista y en el borde shoji), nombre de
+     44 px, márgenes de 16 px y captura y texto a partes iguales. */
+  @media (min-width: 960px) and (max-height: 860px) {
+    .panel {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      /* Una fila menos: sin el índice, los enlaces siguen en la última (la que crece). */
+      grid-template-rows: repeat(5, auto) 1fr;
+      column-gap: 32px;
+      padding: 24px;
+    }
+
+    .number {
+      display: none;
+    }
+
+    .name {
+      margin-top: 0;
+      font-size: 44px;
+    }
+
+    .summary {
+      margin-top: 6px;
+      font-size: 17px;
+    }
+
+    .problem {
+      margin-top: 16px;
+      font-size: 18px;
+    }
+
+    .stack,
+    .fact {
+      margin-top: 16px;
+    }
+
+    .fact {
+      font-size: 22px;
+    }
+  }
+</style>

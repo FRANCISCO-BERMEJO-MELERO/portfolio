@@ -195,6 +195,8 @@ const TYPES: Record<string, string> = {
   '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2',
   '.png': 'image/png',
+  '.avif': 'image/avif',
+  '.webp': 'image/webp',
   '.json': 'application/json',
   '.txt': 'text/plain; charset=utf-8',
 };

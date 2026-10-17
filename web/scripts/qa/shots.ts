@@ -2,7 +2,8 @@
 // reduced motion y sin JS, en los estados de scroll pedidos.
 //   --path /            página
 //   --at 0,200px,#x     estados: fracción del scroll total (0–1), píxeles de scroll (200px), un #ancla
-//                       o kaizen:0.5 (fracción del recorrido del escenario del kaizen, ya pegado)
+//                       o escena:0.5 (fracción del recorrido del escenario de [data-<escena>-scene],
+//                       ya pegado: kaizen:0.5, projects:0.3)
 //   --out dir           carpeta de salida (por defecto qa-output/shots)
 //   --wait ms           espera tras cargar, antes del primer estado (por defecto 1800: la carga
 //                       del hero, ensō + sello, dura 1,6 s)
@@ -54,8 +55,8 @@ await run('qa:shots', async ({ url, browser }) => {
     for (const at of AT) {
       // Con JS desactivado, Runtime.evaluate sigue funcionando (solo se bloquean los scripts de la página).
       await page.evaluate(
-        at.startsWith('kaizen:')
-          ? `(() => { const s = document.querySelector('[data-kaizen-scene]'); const st = s.querySelector('[data-stage]'); scrollTo({ top: Math.floor(s.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(st).top) || 0) + ${Number(at.slice(7))} * (s.offsetHeight - st.offsetHeight)), behavior: 'instant' }); })()`
+        /^[a-z]+:/.test(at)
+          ? `(() => { const s = document.querySelector('[data-${at.split(':')[0]}-scene]'); const st = s.querySelector('[data-stage]'); scrollTo({ top: Math.floor(s.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(st).top) || 0) + ${Number(at.split(':')[1])} * (s.offsetHeight - st.offsetHeight)), behavior: 'instant' }); })()`
           : at.startsWith('#')
           ? `document.querySelector(${JSON.stringify(at)})?.scrollIntoView({ behavior: 'instant' })`
           : at.endsWith('px')

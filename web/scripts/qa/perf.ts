@@ -1,15 +1,20 @@
 // pnpm qa:perf — fluidez en móvil: 390 × 844 @3x, táctil, CPU ×4. Un gesto de scroll de arriba
 // abajo a 1 200 px/s, tres pasadas por página: 0 fotogramas > 33 ms (D9).
 // Además, CLS al cargar con CPU ×4 (criterio 7 de la fase 1: ≤ 0,02).
+// Antes de las pasadas medidas se hace una de calentamiento que no cuenta (--warmup 0 la quita):
+// la primera de un Chrome recién lanzado paga el arranque en frío (JIT, sombreadores, cachés) y
+// daba 1–6 fotogramas > 33 ms en cualquier página (fase 1, FTD · D9). Se imprime igualmente.
 import { arg, run, sleep } from './lib.ts';
 
 const PATHS = (arg('paths') ?? '/').split(',');
 const PASSES = 3;
+const WARMUP = Number(arg('warmup') ?? 1);
 const CPU = Number(arg('cpu') ?? 4);
 
 await run('qa:perf', async ({ url, browser, fail }) => {
   for (const path of PATHS) {
-    for (let pass = 1; pass <= PASSES; pass++) {
+    for (let pass = 1 - WARMUP; pass <= PASSES; pass++) {
+      const warm = pass < 1;
       const page = await browser.newPage();
       await page.viewport('mobile');
       await page.send('Emulation.setCPUThrottlingRate', { rate: CPU });
@@ -42,9 +47,14 @@ await run('qa:perf', async ({ url, browser, fail }) => {
         return { frames: f.length, p50: q(0.5), p95: q(0.95), max: s[s.length - 1] ?? 0, over33: d.filter((x) => x > 33.4).length, scrollY };
       })()`);
       const f = (n: number) => n.toFixed(1);
+      const label = warm ? 'calentamiento (no cuenta)' : `pasada ${pass}`;
       console.log(
-        `  ${path} pasada ${pass}: ${distance}px · ${r.frames} fotogramas · p50 ${f(r.p50)} · p95 ${f(r.p95)} · máx ${f(r.max)} ms · > 33 ms: ${r.over33} · CLS ${cls.toFixed(4)}`,
+        `  ${path} ${label}: ${distance}px · ${r.frames} fotogramas · p50 ${f(r.p50)} · p95 ${f(r.p95)} · máx ${f(r.max)} ms · > 33 ms: ${r.over33} · CLS ${cls.toFixed(4)}`,
       );
+      if (warm) {
+        await page.close();
+        continue;
+      }
       if (r.over33) fail(`${path} pasada ${pass}: ${r.over33} fotogramas > 33 ms`);
       if (cls > 0.02) fail(`${path} pasada ${pass}: CLS ${cls.toFixed(4)} > 0,02`);
       if (Math.abs(r.scrollY - distance) > 2) fail(`${path} pasada ${pass}: el gesto no llegó al final (${r.scrollY} de ${distance})`);

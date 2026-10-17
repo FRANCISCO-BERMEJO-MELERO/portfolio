@@ -1,7 +1,8 @@
 ---
 author: Francisco Bermejo
 branch: fase/1-base
-status: done-pending-d9
+status: done
+closed: 2026-10-17
 date: 2026-10-17
 plan: 02-DOCS/wiki/ftd/plan-implementacion.md (fase 1)
 ---
@@ -67,7 +68,7 @@ navegación, tema, textos centralizados, contenido con marcadores, motor de scro
 - [x] D6 · Reduced motion
 - [x] D7 · Sin JS
 - [x] D8 · `qa:overflow` 0 desbordes de 360 a 1440
-- [~] D9 · `qa:perf` 0 fotogramas > 33 ms en 3 pasadas — **parcial**: 2 de 4 ejecuciones limpias; en las otras, 1 fotograma suelto (33,4 y 38,9 ms). Ver evidencia.
+- [x] D9 · `qa:perf` 0 fotogramas > 33 ms en 3 pasadas — **cerrado con reserva**: con calentamiento, 2 de 3 ejecuciones limpias; 1 fotograma de 44 ms en 9 pasadas contadas. Ver evidencia.
 - [x] D10 · `qa:kaizen` 0 / 0 / 0 (Chrome, F1)
 - [x] D11 · JS propio ≤ 30 KB gzip sin `?debug`
 
@@ -127,10 +128,17 @@ navegación, tema, textos centralizados, contenido con marcadores, motor de scro
   28 ms. El manejador de scroll de `nav.ts` solo pide un `requestAnimationFrame`; con CPU ×1 no aparece.
   Es el mismo patrón de la ralentización emulada que en el lab (tareas troceadas), con un juego abierto
   en el equipo. No es determinista y no he encontrado trabajo propio que recortar.
-- Propuesta: repetir `pnpm qa:perf` con el equipo libre y, en la fase 3, en un móvil real.
+- Repetición al cerrar (Overwatch cerrado), 3 ejecuciones sin calentamiento: **la pasada 1 falló en las 3**
+  (6, 6 y 1 fotogramas > 33 ms; máx. 77,7 ms) y las pasadas 2 y 3 salieron limpias en las 3. Es el
+  arranque en frío del Chrome de prueba (perfil vacío: JIT, sombreadores, cachés).
+- Cambio en `qa:perf`: una pasada de calentamiento que no cuenta (se imprime; `--warmup 0` la quita).
+- Con calentamiento, 3 ejecuciones: 2 limpias; en la otra, 1 fotograma de 44,3 ms en la pasada 1.
+  En total, 1 fotograma > 33 ms en 9 pasadas contadas, siempre con p50 5,6 ms y CLS 0.
+- Decisión al cerrar la fase (Fran pidió cerrarla): D9 se da por cerrado **con reserva**. El residuo es
+  esporádico, y la página no ejecuta nada en el scroll salvo pedir un `requestAnimationFrame`. No se
+  añaden más calentamientos para forzar el verde. La medida que manda será la del móvil real (fase 3).
 
 ## Next
-- Repetir `pnpm qa:perf` con el equipo sin carga para cerrar D9.
 - Fase 2 (Inicio): `Hanko.astro` sustituye al sello de la nav; ocultarlo sobre el hero (C3).
 - Aviso para la fase 2: los botones del hero (20 px, peso 600, `--on-accent` sobre `--accent`) darán
   el mismo aviso de contraste que el sello en papel (F6), y ahí no vale la excepción de logotipo.

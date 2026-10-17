@@ -121,7 +121,7 @@ navegación, tema, textos centralizados, contenido con marcadores, motor de scro
 - D10 · `qa:kaizen` (Chrome, F1): 148 + 253 estados, 0 / 0 / 0.
 - D11 · `qa:weight`: JS propio 2,7 KB gzip (nav, tema y escena; `?debug` 48,9 KB aparte, no cuenta).
 
-### D9 · fluidez en `/` (parcial)
+### D9 · fluidez en `/` (cerrado con reserva)
 - 4 ejecuciones de `qa:perf` (3 pasadas cada una, 390 × 844, CPU ×4): p50 5,6 ms y CLS 0 en todas. Dos
   ejecuciones limpias; dos con **un** fotograma > 33 ms (33,4 ms en la pasada 2; 38,9 ms en la pasada 1).
 - Traza de una primera pasada: las tareas largas son `EventDispatch scroll` de ~21 ms y un `Commit` de

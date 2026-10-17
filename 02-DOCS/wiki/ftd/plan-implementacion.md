@@ -180,7 +180,7 @@ auditoría el 17 oct, P12). Se añaden en la fase 1 bajo `web/scripts/qa/`:
 | `pnpm qa:specs` | Compara estilos calculados (tamaño, interlineado, colores, paddings) de elementos marcados con `data-qa` contra la tabla de medidas de las maquetas (`scripts/qa/reference-specs.ts`) |
 | `pnpm qa:axe` | axe-core inyectado: 0 incidencias *serious* o *critical*, en los dos modos |
 | `pnpm qa:overflow` | Sin scroll horizontal a 360, 390, 768, 1024, 1280 y 1440 px |
-| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms |
+| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms (tras una pasada de calentamiento que no cuenta; fase 1, D9) |
 | `pnpm qa:kaizen` | Ejecuta la auditoría del `?debug` en Chrome y falla si fuga, hueco o diff ≠ 0 |
 | `pnpm qa` | Todo lo anterior |
 

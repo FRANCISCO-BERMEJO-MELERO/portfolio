@@ -13,6 +13,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "content:pending": "node scripts/content-pending.ts",
     "qa": "node scripts/qa/all.ts",
     "qa:shots": "node scripts/qa/shots.ts",
     "qa:specs": "node scripts/qa/specs.ts",

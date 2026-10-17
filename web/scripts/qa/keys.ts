@@ -1,6 +1,6 @@
 // pnpm qa:keys — teclado (D5): recorre la página con Tab en escritorio y móvil y comprueba que
 // cada elemento que recibe el foco tiene foco visible y un área pulsable ≥ 44 × 44 px
-// (el punto central y las cuatro esquinas de un cuadrado de 44 px lo «tocan» a él).
+// (el punto central y las cuatro esquinas de un cuadrado de 44 px, a 1 px del borde, lo «tocan» a él).
 import { arg, open, run, THEMES, type ViewportName } from './lib.ts';
 
 const PATHS = (arg('paths') ?? '/').split(',');
@@ -23,7 +23,8 @@ await run('qa:keys', async ({ url, browser, fail }) => {
             await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
             const cs = getComputedStyle(el);
             const r = el.getBoundingClientRect();
-            const cx = r.left + r.width / 2, cy = r.top + r.height / 2, h = 21.5;
+            // 1 px dentro del cuadrado de 44: en el borde exacto, el redondeo subpíxel de Chrome decide al azar.
+            const cx = r.left + r.width / 2, cy = r.top + r.height / 2, h = 21;
             const points = [[cx, cy], [cx - h, cy - h], [cx + h, cy - h], [cx - h, cy + h], [cx + h, cy + h]];
             const hits = points.map(([x, y]) => { const t = document.elementFromPoint(x, y); return !!t && (t === el || el.contains(t)); });
             const label = (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().replace(/\\s+/g, ' ').slice(0, 40);

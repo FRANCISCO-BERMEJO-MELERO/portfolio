@@ -16,10 +16,10 @@ await run('qa:specs', async ({ url, browser, fail }) => {
       for (const path of new Set(SPECS.filter((s) => s.viewport === viewport).map((s) => s.path))) {
         const page = await open(browser, url + path, { viewport, theme });
         for (const spec of SPECS.filter((s) => s.viewport === viewport && s.path === path && (!s.theme || s.theme === theme))) {
-          const where = `${spec.ref} ${viewport} ${theme} [data-qa=${spec.qa}]`;
+          const where = `${spec.ref} ${viewport} ${theme} [data-qa=${spec.qa}]${spec.state ?? ''}`;
           const props = Object.keys(spec.css ?? {});
           const got = await page.evaluate<{ css: Record<string, string>; width: number; height: number } | null>(`(() => {
-            const el = document.querySelector('[data-qa="${spec.qa}"]');
+            const el = document.querySelector('[data-qa="${spec.qa}"]${spec.state ?? ''}');
             if (!el) return null;
             const cs = getComputedStyle(el);
             const r = el.getBoundingClientRect();

@@ -23,7 +23,7 @@ const VARIANTS: Variant[] = [
   { viewport: 'mobile', theme: 'papel', nojs: true },
 ];
 
-const slug = (s: string) => s.replace(/^#/, '').replace(/[^\w.-]+/g, '-') || 'top';
+const slug = (s: string) => s.replace(/^[#/]+|\/+$/g, '').replace(/[^\w.-]+/g, '-') || 'inicio';
 
 await run('qa:shots', async ({ url, browser }) => {
   mkdirSync(OUT, { recursive: true });
@@ -32,7 +32,9 @@ await run('qa:shots', async ({ url, browser }) => {
     await page.viewport(v.viewport);
     await page.media({ theme: v.theme, reduced: v.reduced ?? false });
     if (v.nojs) await page.send('Emulation.setScriptExecutionDisabled', { value: true });
-    await page.goto(url + PATH);
+    // Sin JS no corren requestAnimationFrame ni las promesas de la página: solo se espera a la carga.
+    await page.goto(url + PATH, { settle: !v.nojs });
+    if (v.nojs) await sleep(500);
     for (const at of AT) {
       // Con JS desactivado, Runtime.evaluate sigue funcionando (solo se bloquean los scripts de la página).
       await page.evaluate(

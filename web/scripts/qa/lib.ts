@@ -69,7 +69,8 @@ export type Page = {
   on(method: string, fn: Listener): () => void;
   /** Evalúa una expresión en la página (espera promesas) y devuelve su valor. */
   evaluate<T = unknown>(expression: string): Promise<T>;
-  goto(url: string): Promise<void>;
+  /** Navega y espera a la carga, las fuentes y dos fotogramas (con `settle: false`, solo a la carga). */
+  goto(url: string, opts?: { settle?: boolean }): Promise<void>;
   viewport(name: ViewportName): Promise<void>;
   /** Emula preferencias del sistema: modo de color y reduced motion. */
   media(opts: { theme?: Theme; reduced?: boolean }): Promise<void>;
@@ -134,7 +135,7 @@ export async function launch(): Promise<Browser> {
           if (r.exceptionDetails) throw new Error(`evaluate: ${r.exceptionDetails.exception?.description ?? r.exceptionDetails.text}`);
           return r.result.value as T;
         },
-        async goto(url) {
+        async goto(url, { settle = true } = {}) {
           const loaded = new Promise<void>((resolve) => {
             const off = conn.on(sessionId, 'Page.loadEventFired', () => {
               off();
@@ -143,6 +144,7 @@ export async function launch(): Promise<Browser> {
           });
           await send('Page.navigate', { url });
           await loaded;
+          if (!settle) return;
           await page.evaluate('document.fonts.ready.then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))');
         },
         async viewport(name) {

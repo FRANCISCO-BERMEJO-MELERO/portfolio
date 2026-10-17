@@ -1,8 +1,9 @@
 ---
 author: Francisco Bermejo
 branch: fase/2-inicio
-status: in-progress
+status: done
 date: 2026-10-17
+closed: 2026-10-17
 plan: 02-DOCS/wiki/ftd/plan-implementacion.md (fase 2)
 ---
 
@@ -28,6 +29,7 @@ sobre él (C12) y después viaja con el scroll hasta la navegación (C3).
 | F12 | La caída del sello al cargar (C12) | La hace ese mismo sello de la nav, colocado sobre el ensō: escala 1,9 → 0,94 → 1 con giro y opacidad (`@keyframes`, 1,2–1,58 s). La mancha es una forma SVG fija calculada en el build que solo cambia escala y opacidad (1,38–1,6 s) y desaparece: el estado final es d-01 | Claude, implementación |
 | F13 | Antetítulo de sección 1 px más alto que en las maquetas (heredaba el `line-height: 1.5` de la web) | `SectionHeading` con `line-height: normal`, como las maquetas (44 px en escritorio, 37 en móvil) | Claude, corrección de fidelidad |
 | F14 | Fuentes del hero precargadas | Shippori 600 (título) e Inter 600 (botones) se precargan. Si llegan tarde, el cambio de fuente rehace la página en mitad de la animación de carga (ver la evidencia del criterio 1) | Claude, corrección de rendimiento |
+| F16 | Fotogramas del criterio 1 y D9 sin medida válida (equipo cargado) | Se cierran **con reserva**, sin repetir la medida en reposo. Apoyo: A/B de 32 + 32 cargas con el equipo tranquilo, 0 / 0. La medida que manda será la del móvil real (fase 3), como en la fase 1 | Fran |
 | F15 | «ō» de ensō (nombre accesible del ensō) | Entra en el subconjunto de Inter. Shippori no tiene vocales con macrón en ninguna versión: `subset-fonts.ts` no las exige en la serif (solo se usan en nombres accesibles o texto de Inter) | Claude |
 
 ## Checklist
@@ -42,7 +44,7 @@ sobre él (C12) y después viaja con el scroll hasta la navegación (C3).
 - [x] `reference-specs.ts` ampliado con el hero; pruebas `qa:hero` y `qa:hanko` en `pnpm qa`.
 
 ### Criterios de aceptación
-- [ ] 1 · Ensō y caída del sello ≤ 1,6 s; 0 fotogramas > 33 ms durante la animación (móvil, CPU ×4) — duración ✓; fotogramas: **pendiente de una medida con el equipo en reposo** (ver evidencia)
+- [x] 1 · Ensō y caída del sello ≤ 1,6 s; 0 fotogramas > 33 ms durante la animación (móvil, CPU ×4) — duración ✓; fotogramas: **cerrado con reserva** (F16)
 - [x] 2 · Tránsito: 5 estados (0, 25, 50, 75, 100 %) ±2 px de la curva; d-02 ±2 px
 - [x] 3 · Relevo en `p = 1`: posición y tamaño ≤ 1 px
 - [x] 4 · Volver arriba: mismas 5 medidas, sin saltos
@@ -59,7 +61,7 @@ sobre él (C12) y después viaja con el scroll hasta la navegación (C3).
 - [x] D6 · Reduced motion
 - [x] D7 · Sin JS
 - [x] D8 · `qa:overflow` 0 desbordes de 360 a 1440
-- [ ] D9 · `qa:perf` 0 fotogramas > 33 ms en 3 pasadas — **pendiente de una medida con el equipo en reposo**
+- [x] D9 · `qa:perf` 0 fotogramas > 33 ms en 3 pasadas — **cerrado con reserva** (F16)
 - [x] D10 · `qa:kaizen` 0 / 0 / 0 (Chrome, F1)
 - [x] D11 · JS propio ≤ 30 KB gzip sin `?debug`
 
@@ -172,9 +174,10 @@ sobre él (C12) y después viaja con el scroll hasta la navegación (C3).
   muestra cambios de contenido.
 
 ### Veredicto: FAIL — 2 puntos abiertos (criterio 1 · fotogramas y D9), sin evidencia válida por la
-carga del equipo. Todo lo demás, verificado.
+carga del equipo. Todo lo demás, verificado. Fran cierra la fase con esos dos puntos con reserva (F16).
 
 ## Next
-- Repetir `pnpm qa:hero` y `pnpm qa:perf` con el equipo en reposo y cerrar el criterio 1 y la D9.
+- Fase 3: medir la fluidez (carga del hero y scroll) en el móvil real y, si se puede, repetir
+  `pnpm qa:hero` y `pnpm qa:perf` con el equipo en reposo (F16).
 - Fran: validar la escala intermedia (capturas de 768 y 1024).
 - Contenido pendiente para esta sección: rol, frase del hero e iniciales del sello.

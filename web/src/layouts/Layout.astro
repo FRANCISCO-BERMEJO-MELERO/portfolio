@@ -1,0 +1,52 @@
+---
+// Layout de la web: head, tema sin parpadeo, clase html.js, fuentes autoalojadas y lang.
+import { Font } from 'astro:assets';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+// Colores de la barra del navegador en cada modo (= --bg).
+const themeColor = { papel: '#f3efe6', sumi: '#15130f' };
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content={themeColor.papel} media="(prefers-color-scheme: light)" data-theme-color />
+    <meta name="theme-color" content={themeColor.sumi} media="(prefers-color-scheme: dark)" data-theme-color />
+    {/* Antes del primer pintado: modo guardado o el del sistema, y html.js para las animaciones. */}
+    <script is:inline define:vars={{ themeColor }}>
+      (() => {
+        const root = document.documentElement;
+        root.classList.add('js');
+        let theme = null;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch {}
+        if (theme !== 'papel' && theme !== 'sumi') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'sumi' : 'papel';
+        }
+        root.dataset.theme = theme;
+        for (const meta of document.querySelectorAll('meta[data-theme-color]')) {
+          meta.setAttribute('content', themeColor[theme]);
+        }
+      })();
+    </script>
+    <Font cssVariable="--font-sans" preload={[{ weight: 400 }, { weight: 500 }]} />
+    <Font cssVariable="--font-serif" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-mono" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

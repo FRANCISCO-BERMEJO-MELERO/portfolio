@@ -1,5 +1,6 @@
 ---
-import KaizenScene from '../components/KaizenScene.astro';
+// Página del lab: la escena kaizen aislada mientras no esté en la página real (se borra en la fase 3).
+import KaizenScene from '../../components/kaizen/KaizenScene.astro';
 ---
 
 <!doctype html>
@@ -7,6 +8,7 @@ import KaizenScene from '../components/KaizenScene.astro';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
     <title>Kaizen · prueba de trazos</title>
     <style is:global>
       html {

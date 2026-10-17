@@ -28,6 +28,7 @@ No contiene código.
 | P9 | Email | En claro | Fase 6 |
 | P10 | CV / idiomas | **De momento la web solo en español** | Fuera: `/en/`, selector de idioma, `hreflang`, traducción y CV en inglés (§1.7) |
 | P11 | Traslado de las maquetas a `reference/` | Incluirlo en el primer commit de la fase 1 | Fase 1 |
+| P12 | Firefox ya no está instalado (17 oct) | **Fuera de la auditoría**: `qa:kaizen` y D10 solo en Chrome | §1.8, D10 |
 
 ## Fuentes leídas
 | Fuente | Dónde | Papel en el plan |
@@ -170,8 +171,8 @@ cumplen. Ningún texto sobre `--accent` puede bajar de 18,66 px en negrita.
   tecnología que no está en `stack.ts`.
 
 ### 1.8 Herramientas de verificación (sin Playwright)
-Decisión previa de Fran: nada de Playwright. Se usan Chrome y Firefox instalados por CDP y WebDriver
-BiDi, como en la fase kaizen. Se añaden en la fase 1 bajo `web/scripts/qa/`:
+Decisión previa de Fran: nada de Playwright. Se usa Chrome instalado por CDP (Firefox salió de la
+auditoría el 17 oct, P12). Se añaden en la fase 1 bajo `web/scripts/qa/`:
 
 | Comando | Qué mide |
 | --- | --- |
@@ -179,8 +180,8 @@ BiDi, como en la fase kaizen. Se añaden en la fase 1 bajo `web/scripts/qa/`:
 | `pnpm qa:specs` | Compara estilos calculados (tamaño, interlineado, colores, paddings) de elementos marcados con `data-qa` contra la tabla de medidas de las maquetas (`scripts/qa/reference-specs.ts`) |
 | `pnpm qa:axe` | axe-core inyectado: 0 incidencias *serious* o *critical*, en los dos modos |
 | `pnpm qa:overflow` | Sin scroll horizontal a 360, 390, 768, 1024, 1280 y 1440 px |
-| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms |
-| `pnpm qa:kaizen` | Ejecuta la auditoría del `?debug` en Chrome y Firefox y falla si fuga, hueco o diff ≠ 0 |
+| `pnpm qa:perf` | Gesto de scroll en 390 × 844, CPU ×4: fotogramas > 33 ms (tras una pasada de calentamiento que no cuenta; fase 1, D9) |
+| `pnpm qa:kaizen` | Ejecuta la auditoría del `?debug` en Chrome y falla si fuga, hueco o diff ≠ 0 |
 | `pnpm qa` | Todo lo anterior |
 
 Lighthouse se ejecuta con su CLI (usa el Chrome instalado).
@@ -252,7 +253,7 @@ Todo se comprueba en escritorio (1440 × 900) y móvil (390 × 844), en papel y 
 | D7 | Sin JS | El contenido se ve completo y legible (equivale a reduced motion) |
 | D8 | Sin desbordes | `pnpm qa:overflow`: 0 scroll horizontal de 360 a 1440 px |
 | D9 | Fluidez | `pnpm qa:perf`: 0 fotogramas > 33 ms en 3 pasadas |
-| D10 | Kaizen intacto (desde la fase 1) | `pnpm qa:kaizen`: 0 fuga, 0 hueco, diff final 0 px en Chrome y Firefox |
+| D10 | Kaizen intacto (desde la fase 1) | `pnpm qa:kaizen`: 0 fuga, 0 hueco, diff final 0 px en Chrome (P12) |
 | D11 | Peso | JS propio ≤ 30 KB gzip sin contar el `?debug` (se mide en cada fase y se anota la evolución) |
 
 ---
@@ -291,7 +292,7 @@ En móvil, la barra lleva el sello y el selector de tema; el menú llega en la f
 - Se borra: `web/src/scripts/scroll-progress.ts` (sustituido por `scroll.ts`).
 
 **Criterios de aceptación.**
-1. `pnpm qa:kaizen` sobre `/lab/kaizen` con el motor nuevo: 0 / 0 / 0 px en Chrome y Firefox (igual que en el lab).
+1. `pnpm qa:kaizen` sobre `/lab/kaizen` con el motor nuevo: 0 / 0 / 0 px en Chrome (igual que en el lab; P12).
 2. Navegación: 88 px en escritorio, 64 px en móvil, fija; `qa:specs` ±1 px contra d-01 y m-01.
 3. Sección activa: al hacer scroll por las seis secciones, el enlace correcto lleva `aria-current` en 6/6 posiciones de prueba.
 4. Tema: sin elección guardada sigue al sistema; tras elegir, se recuerda al recargar; 0 parpadeo del modo equivocado (captura del primer pintado con CPU ×4).
@@ -376,7 +377,7 @@ y sumi. Se borra `/lab/kaizen`.
 - Se borran: `web/src/pages/lab/kaizen.astro`.
 
 **Criterios de aceptación.**
-1. `pnpm qa:kaizen` sobre `/`: 0 fuga, 0 hueco, diff final 0 px, en Chrome y Firefox, en papel **y** en sumi.
+1. `pnpm qa:kaizen` sobre `/`: 0 fuga, 0 hueco, diff final 0 px, en Chrome (P12), en papel **y** en sumi.
 2. Estados: capturas a `p = 0`, `0,5` y `1` comparables con d-04/05/06 y m-03/04/05; opacidades de la columna iguales a las maquetas.
 3. Encaje: a 1440 × 900 la sección completa cabe en el escenario sticky; a 1280 × 720 y a 375 × 667 no se corta nada (los kanji se reducen; si no cabe, el párrafo sale del escenario).
 4. Accesibilidad: 改善 se anuncia una vez («改善, kaizen») y la columna de significado se lee como texto; los SVG van `aria-hidden`.

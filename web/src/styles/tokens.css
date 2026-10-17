@@ -1,0 +1,71 @@
+/*
+ * Tokens de los dos modos (plan §1.5). Papel es el claro y sumi el oscuro.
+ * - Con JS, el script del <head> pone data-theme en <html> antes del primer pintado.
+ * - Sin JS, manda prefers-color-scheme (el bloque @media).
+ * Contraste: --on-accent sobre --accent en papel da 3,52:1 → solo texto ≥ 18,66 px en negrita o ≥ 24 px.
+ */
+:root,
+:root[data-theme='papel'] {
+  color-scheme: light;
+  --bg: #f3efe6;
+  --surface: #ebe5d8;
+  --text: #1b1a17;
+  --text-2: #6b665c;
+  --line: #d6cfbf;
+  --accent: #e2482a;
+  --on-accent: #f3efe6;
+  --accent-text: #c0391d;
+  --accent-text-surface: #b4351b;
+  --accent-hover: #9e2e17;
+  --term-bg: #1b1a17;
+  --term-line: #3a362e;
+  --term-text: #ece6d8;
+  --term-text-2: #b5ae9f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='papel']) {
+    color-scheme: dark;
+    --bg: #15130f;
+    --surface: #1e1b16;
+    --text: #ece6d8;
+    --text-2: #8c8577;
+    --line: #2e2a23;
+    --accent: #f0573a;
+    --on-accent: #15130f;
+    --accent-text: #f0573a;
+    --accent-text-surface: #f0573a;
+    --accent-hover: #ff7a5e;
+    --term-bg: #0c0b08;
+  }
+}
+
+:root[data-theme='sumi'] {
+  color-scheme: dark;
+  --bg: #15130f;
+  --surface: #1e1b16;
+  --text: #ece6d8;
+  --text-2: #8c8577;
+  --line: #2e2a23;
+  --accent: #f0573a;
+  --on-accent: #15130f;
+  --accent-text: #f0573a;
+  --accent-text-surface: #f0573a;
+  --accent-hover: #ff7a5e;
+  --term-bg: #0c0b08;
+}
+
+:root {
+  /* Corte móvil / escritorio: 960 px (no se puede usar en @media; se repite allí a mano). */
+  --nav-h: 64px;
+  /* Margen lateral: 24 px en móvil; en escritorio crece de 32 px (960) a 96 px (1440), como las maquetas. */
+  --gutter: 24px;
+  --max-w: 1440px;
+}
+
+@media (min-width: 960px) {
+  :root {
+    --nav-h: 88px;
+    --gutter: clamp(32px, 13.3333vw - 96px, 96px);
+  }
+}

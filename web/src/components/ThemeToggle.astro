@@ -1,0 +1,60 @@
+---
+// Selector de modo papel / sumi (d-01, m-01). El icono es un círculo medio relleno: la mitad
+// derecha en papel, la izquierda en sumi. La etiqueta dice a qué modo se cambia (scripts/theme.ts).
+import { ui } from '../i18n/ui.ts';
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  aria-label={ui.theme.toSumi}
+  data-theme-toggle
+  data-label-papel={ui.theme.toSumi}
+  data-label-sumi={ui.theme.toPapel}
+  data-qa="theme-toggle"
+>
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" data-qa="theme-icon">
+    <circle cx="12" cy="12" r="8"></circle>
+    <path d="M12 4a8 8 0 0 1 0 16z"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  circle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  path {
+    fill: currentColor;
+    transform-origin: 12px 12px;
+  }
+
+  /* En sumi se rellena la otra mitad (d-03: «M12 4a8 8 0 0 0 0 16z»). */
+  :global(:root[data-theme='sumi']) path {
+    transform: scaleX(-1);
+  }
+
+  /* Sin JS el botón no haría nada: se oculta sin mover la barra. */
+  :global(html:not(.js)) .theme-toggle {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  import '../scripts/theme.ts';
+</script>

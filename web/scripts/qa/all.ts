@@ -2,7 +2,7 @@
 // Requiere pnpm build antes. Las capturas (qa:shots) no se incluyen: se piden por fase.
 import { spawnSync } from 'node:child_process';
 
-const SUITES = ['weight', 'specs', 'axe', 'keys', 'overflow', 'nav', 'theme', 'hanko', 'hero', 'about', 'projects', 'perf', 'kaizen'];
+const SUITES = ['weight', 'specs', 'axe', 'keys', 'overflow', 'nav', 'theme', 'hanko', 'hero', 'about', 'projects', 'journey', 'perf', 'kaizen'];
 const results: [string, boolean, number][] = [];
 for (const suite of SUITES) {
   const t0 = Date.now();

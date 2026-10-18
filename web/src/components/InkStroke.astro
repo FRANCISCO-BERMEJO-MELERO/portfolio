@@ -18,9 +18,13 @@ interface Props {
   label?: string;
   /** Animación al cargar, en ms. */
   draw?: { duration: number; delay?: number };
+  /** Estira el lienzo a la caja sin conservar la proporción (la trayectoria: solo en su eje largo). */
+  stretch?: boolean;
+  /** Guía fina en --line bajo el trazo: se ve lo que falta por pintar (d-09, m-08). */
+  guide?: boolean;
 }
 
-const { id, viewBox, points, widths, label, draw } = Astro.props;
+const { id, viewBox, points, widths, label, draw, stretch = false, guide = false } = Astro.props;
 const f = (v: number) => Math.round(v * 100) / 100;
 
 // La máscara: la misma línea central, alargada por los dos extremos lo que mide el radio del trazo
@@ -43,6 +47,7 @@ const style = draw ? `--ink-duration: ${draw.duration}ms; --ink-delay: ${draw.de
 <svg
   class:list={['ink', { draw }]}
   viewBox={viewBox}
+  preserveAspectRatio={stretch ? 'none' : undefined}
   role={label ? 'img' : undefined}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}
@@ -51,6 +56,7 @@ const style = draw ? `--ink-duration: ${draw.duration}ms; --ink-delay: ${draw.de
   <mask id={id} maskUnits="userSpaceOnUse" x={vx} y={vy} width={vw} height={vh}>
     <path class="reveal" d={centerline} pathLength="1" stroke-width={reveal}></path>
   </mask>
+  {guide && <polyline class="guide" points={points.map((p) => p.join(',')).join(' ')} />}
   <g class="strokes" mask={`url(#${id})`}>
     {widths.map((w, i) => <path d={`M${points[i]![0]},${points[i]![1]} L${points[i + 1]![0]},${points[i + 1]![1]}`} stroke-width={w} />)}
   </g>
@@ -61,6 +67,12 @@ const style = draw ? `--ink-duration: ${draw.duration}ms; --ink-delay: ${draw.de
   .ink {
     width: 100%;
     height: 100%;
+  }
+
+  .guide {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1.5;
   }
 
   .strokes {

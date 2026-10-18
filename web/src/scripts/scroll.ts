@@ -7,10 +7,14 @@
 //   data-scene-start (por defecto "top 100%") y data-scene-end (por defecto "bottom 0%"):
 //   «<borde del elemento> <punto de la ventana>», con borde top | center | bottom y punto N%, Npx o
 //   nav (el borde inferior de la navegación fija).
-// - data-scene-track="<selector>" mide otro elemento: el progreso sale de él y --p se escribe en la
-//   escena (así el sello de la nav sigue el paso del hero).
+// - data-scene-pass="<media query>": modo pass mientras la media query se cumpla y sticky si no (la
+//   trayectoria: sticky en escritorio, pass en móvil). Se vuelve a decidir en cada medida.
+// - data-scene-track="<selector>" mide otro elemento en modo pass: el progreso sale de él y --p se
+//   escribe en la escena (así el sello de la nav sigue el paso del hero).
 // - data-steps="n" escribe además data-step="k" (0 … n−1) en la escena y, al cambiar, lanza en ella
-//   el evento «scenestep» (detail = k).
+//   el evento «scenestep» (detail = k). Con setSteps([t0, t1, …]) los pasos los marcan esos umbrales:
+//   k = cuántos ha alcanzado p (0 … n); así los hitos de la trayectoria se encienden donde está su
+//   círculo y no en tramos iguales.
 // - Un solo listener de scroll y un requestAnimationFrame para todas; solo se recalculan las
 //   escenas cerca de la ventana (IntersectionObserver). Las medidas se cachean (carga, cambios de
 //   tamaño de la escena o de body, ventana y fuentes): en el scroll solo se lee scrollY.
@@ -22,6 +26,8 @@ export type Scene = {
   /** Fija --p a mano (modo debug). `null` devuelve el control al scroll. */
   override(p: number | null): void;
   readonly value: number;
+  /** Umbrales de los pasos (ordenados); data-step = cuántos ha alcanzado p. */
+  setSteps(at: readonly number[]): void;
 };
 
 type Edge = { at: number; view: number; px: number; nav: boolean };
@@ -56,11 +62,13 @@ function parseEdge(value: string | undefined, fallback: Edge): Edge {
 const point = (edge: Edge) => viewH * edge.view + edge.px + (edge.nav ? navH : 0);
 
 function createScene(el: HTMLElement): Entry {
-  const pass = el.dataset['scene'] === 'pass';
+  const passMedia = el.dataset['scenePass'] ? matchMedia(el.dataset['scenePass']) : null;
+  const isPass = () => el.dataset['scene'] === 'pass' || !!passMedia?.matches;
   const stage = el.querySelector<HTMLElement>('[data-stage]');
   const selector = el.dataset['sceneTrack'];
   const track = (selector && document.querySelector<HTMLElement>(selector)) || el;
   const steps = Number(el.dataset['steps'] ?? 0);
+  let thresholds: readonly number[] | null = null;
   const start = parseEdge(el.dataset['sceneStart'], { at: 0, view: 1, px: 0, nav: false });
   const end = parseEdge(el.dataset['sceneEnd'], { at: 1, view: 0, px: 0, nav: false });
   // Progreso = (scrollY − from) / span, con from y span cacheados.
@@ -77,8 +85,8 @@ function createScene(el: HTMLElement): Entry {
       value = v;
       el.style.setProperty('--p', String(v));
     }
-    if (steps > 0) {
-      const k = Math.min(steps - 1, Math.floor(v * steps));
+    if (thresholds || steps > 0) {
+      const k = thresholds ? thresholds.filter((t) => v >= t).length : Math.min(steps - 1, Math.floor(v * steps));
       if (k !== step) {
         step = k;
         el.dataset['step'] = String(k);
@@ -91,14 +99,14 @@ function createScene(el: HTMLElement): Entry {
     el,
     track,
     measure() {
-      const rect = track.getBoundingClientRect();
-      const top = rect.top + scrollY;
-      if (pass) {
+      if (isPass()) {
+        const rect = track.getBoundingClientRect();
+        const top = rect.top + scrollY;
         from = top + rect.height * start.at - point(start);
         span = Math.max(1, top + rect.height * end.at - point(end) - from);
       } else {
         // Sin sticky (sin JS, reduced motion) el `top` calculado es «auto» → 0.
-        from = top - (stage ? Number.parseFloat(getComputedStyle(stage).top) || 0 : 0);
+        from = el.getBoundingClientRect().top + scrollY - (stage ? Number.parseFloat(getComputedStyle(stage).top) || 0 : 0);
         span = Math.max(1, el.offsetHeight - (stage?.offsetHeight ?? 0));
       }
     },
@@ -109,6 +117,11 @@ function createScene(el: HTMLElement): Entry {
     },
     override(p) {
       manual = p;
+      this.update();
+    },
+    setSteps(at) {
+      thresholds = at;
+      step = -1;
       this.update();
     },
     get value() {

@@ -1,0 +1,52 @@
+---
+// Trazo de la trayectoria (d-09, m-08): dos lienzos con InkStroke, horizontal (escritorio) y
+// vertical (móvil); cada diseño muestra solo el suyo. Se revelan con el progreso de la escena
+// (--ink = --p) y llevan debajo la guía fina de lo que falta por pintar. Decorativo: el orden de
+// los hitos ya lo da la lista.
+import InkStroke from '../InkStroke.astro';
+import { journeyHorizontal, journeyVertical } from '../../data/ink/journey.ts';
+---
+
+<div class="stroke" data-journey-stroke>
+  <div class="h" data-qa="journey-stroke-h">
+    <InkStroke id="journey-ink-h" viewBox={journeyHorizontal.viewBox} points={journeyHorizontal.points} widths={journeyHorizontal.widths} stretch guide />
+  </div>
+  <div class="v" data-qa="journey-stroke-v">
+    <InkStroke id="journey-ink-v" viewBox={journeyVertical.viewBox} points={journeyVertical.points} widths={journeyVertical.widths} stretch guide />
+  </div>
+</div>
+
+<style>
+  .stroke {
+    --ink: var(--p, 1);
+  }
+
+  /* Móvil (m-08): 28 px de ancho a la izquierda, todo el alto de la lista. */
+  .v {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 28px;
+    height: 100%;
+  }
+
+  .h {
+    display: none;
+  }
+
+  /* Escritorio (d-09): 60 px de alto bajo la banda de los años (200 px), todo el ancho. */
+  @media (min-width: 960px) {
+    .v {
+      display: none;
+    }
+
+    .h {
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 200px;
+      width: 100%;
+      height: 60px;
+    }
+  }
+</style>

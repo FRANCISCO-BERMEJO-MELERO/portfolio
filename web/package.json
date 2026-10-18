@@ -28,7 +28,9 @@
     "qa:weight": "node scripts/qa/weight.ts",
     "qa:hanko": "node scripts/qa/hanko.ts",
     "qa:hero": "node scripts/qa/hero.ts",
-    "qa:about": "node scripts/qa/about.ts"
+    "qa:about": "node scripts/qa/about.ts",
+    "qa:projects": "node scripts/qa/projects.ts",
+    "qa:journey": "node scripts/qa/journey.ts"
   },
   "dependencies": {
     "astro": "7.3.5"

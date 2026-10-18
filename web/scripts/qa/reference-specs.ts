@@ -505,4 +505,44 @@ export const SPECS: Spec[] = [
   { ref: 'm-06', viewport: 'mobile', path: '/', qa: 'project-links', css: { 'margin-top': 12, 'column-gap': 24, 'font-size': 17 } },
   { ref: 'm-06', viewport: 'mobile', path: '/', qa: 'shoji-edge-m', box: { width: 18, height: 597 }, css: { 'border-top-color': t('text') } },
   { ref: 'm-06', viewport: 'mobile', path: '/', qa: 'projects-swipe', css: { 'margin-top': 14, 'font-size': 14, color: t('text-2') } },
+
+  // --- Trayectoria · escritorio (d-09). Las posiciones con el escenario pegado y el encendido los mide
+  // qa:journey. Al cargar la sección está en p = 0 (hitos apagados, F32); con reduced motion, encendidos. ---
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-stroke-h', box: { width: 1248, height: 60 } },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-item', box: { width: 312 }, css: { 'padding-right': 32 } },
+  {
+    ref: 'd-09',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'journey-year',
+    box: { width: 34 },
+    css: { 'font-family': SERIF, 'font-size': 34, 'line-height': 34, 'letter-spacing': 1.36, 'writing-mode': 'vertical-rl', 'text-orientation': 'upright', 'margin-bottom': 20, color: t('text-2') },
+  },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-year', reduced: true, css: { color: t('text') } },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-title', css: { 'font-family': SERIF, 'font-weight': '600', 'font-size': 28, 'line-height': 32.2, color: t('text-2') } },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-title', reduced: true, css: { color: t('text') } },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-detail', css: { 'font-family': SANS, 'font-size': 17, 'line-height': 24.65, 'margin-top': 8, color: t('text-2') } },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-line', css: { 'font-size': 17, 'line-height': 26.35, 'margin-top': 16, color: t('text-2') } },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-line', reduced: true, css: { color: t('text') } },
+  {
+    ref: 'd-09',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'journey-dot',
+    box: { width: 14, height: 14 },
+    css: { 'border-top-width': 1.5, 'border-top-color': t('line'), 'background-color': t('bg') },
+  },
+  { ref: 'd-09', viewport: 'desktop', path: '/', qa: 'journey-dot', reduced: true, css: { 'border-top-color': t('text'), 'background-color': t('text') } },
+
+  // --- Trayectoria · móvil (m-08) ---
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-timeline', css: { 'margin-top': 28 } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-stroke-v', box: { width: 28 } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-item', box: { width: 342, height: 200 }, css: { 'padding-left': 48 } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-year', box: { height: 29 }, css: { 'font-family': SERIF, 'font-size': 20, color: t('text-2') } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-title', css: { 'font-family': SERIF, 'font-weight': '600', 'font-size': 26, 'line-height': 29.9, 'margin-top': 4, color: t('text-2') } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-title', reduced: true, css: { color: t('text') } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-detail', css: { 'font-size': 16, 'line-height': 23.2, 'margin-top': 6, color: t('text-2') } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-line', css: { 'font-size': 16, 'line-height': 24, 'margin-top': 10, color: t('text-2') } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-line', reduced: true, css: { color: t('text') } },
+  { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-dot', box: { width: 14, height: 14 }, css: { 'border-top-color': t('line'), 'background-color': t('bg') } },
 ];

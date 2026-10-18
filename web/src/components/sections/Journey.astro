@@ -1,9 +1,275 @@
 ---
-// 四 Trayectoria. Fase 1: solo el encabezado; el contenido llega en la fase 5.
+// 四 Trayectoria (d-09, d-10, m-08, m-09): un trazo de pincel que se dibuja con el scroll y enciende
+// cada hito al llegar a su círculo. Los hitos salen de journey.ts (4 por C1; la sección vale para N).
+// - Escritorio ≥ 960 × 700, con JS y movimiento: escena sticky; el trazo avanza de izquierda a
+//   derecha bajo los años (en vertical) y sobre las columnas de los hitos.
+// - Móvil (y escritorio bajo): modo pass (data-scene-pass); el trazo vertical avanza mientras la lista
+//   cruza la ventana, con la punta en el 70 % de su alto.
+// - Reduced motion y sin JS: trazo entero, todo encendido, sin sticky.
+// Encendido (F32, como F17): las maquetas atenúan los hitos pendientes con opacidad 0,4, que no llega
+// a AA; aquí año, título y frase pasan de --text-2 a --text, y el círculo se rellena.
+// Un solo HTML para los dos diseños: el año va dentro de cada hito (la lista se lee completa sin el
+// trazo); en escritorio, en la banda de arriba y en vertical.
 import Section from '../Section.astro';
 import SectionHeading from '../SectionHeading.astro';
+import JourneyStroke from '../journey/JourneyStroke.astro';
+import { journey } from '../../data/journey.ts';
+import { DOT_OFFSET, journeyHorizontal, yAt } from '../../data/ink/journey.ts';
+
+const n = journey.length;
+const width = Number(journeyHorizontal.viewBox.split(' ')[2]);
+// Altura del círculo k en el lienzo horizontal: la de la línea central en su x.
+const dotY = (k: number) => yAt(journeyHorizontal.points, DOT_OFFSET + (k * width) / n);
 ---
 
-<Section id="trayectoria">
-  <SectionHeading section="trayectoria" />
+<Section id="trayectoria" flush>
+  <div
+    class="scene"
+    data-scene
+    data-scene-pass="(max-width: 959px), (max-height: 699px)"
+    data-scene-track="[data-journey-track]"
+    data-scene-start="top 70%"
+    data-scene-end="bottom 70%"
+    data-journey-scene
+    data-qa="journey-scene"
+    style={`--n: ${n}`}
+  >
+    <div class="stage" data-stage data-qa="journey-stage">
+      <SectionHeading section="trayectoria" />
+      <div class="timeline" data-journey-track data-qa="journey-timeline">
+        <JourneyStroke />
+        <ol class="list" data-qa="journey-list">
+          {
+            journey.map((m, k) => (
+              <li class="milestone" data-milestone data-qa="journey-item" style={`--dot-y: ${dotY(k)}`}>
+                <span class="dot" aria-hidden="true" data-journey-dot data-qa="journey-dot" />
+                <p class="year" data-pending={m.year.pending} data-qa="journey-year">
+                  {m.year.text}
+                </p>
+                <h3 class="title" data-pending={m.title.pending} data-qa="journey-title">
+                  {m.title.text}
+                </h3>
+                <p class="detail" data-pending={m.detail.pending} data-qa="journey-detail">
+                  {m.detail.text}
+                </p>
+                <p class="line" data-pending={m.line.pending} data-qa="journey-line">
+                  {m.line.text}
+                </p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </div>
 </Section>
+
+<style>
+  /* --- Común: sin JS y reduced motion, trazo entero; medidas de móvil (m-08) --- */
+  .scene {
+    --p: 1;
+  }
+
+  .stage {
+    padding: 28px 0 32px;
+  }
+
+  .timeline {
+    position: relative;
+    margin-top: 28px;
+  }
+
+  .list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .milestone {
+    /* Color del hito: --text encendido; --text-2 mientras la punta no llega (F32). */
+    --c: var(--text);
+    position: relative;
+    min-height: 200px;
+    padding: 0 0 24px 48px;
+  }
+
+  .dot {
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text);
+    background: var(--text);
+  }
+
+  .year {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    line-height: normal;
+    color: var(--text-2);
+  }
+
+  .title {
+    margin-top: 4px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.15;
+    color: var(--c);
+  }
+
+  .detail {
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text-2);
+  }
+
+  .line {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--c);
+  }
+
+  /* --- Con JS y movimiento: el trazo avanza con el scroll y los hitos se encienden al llegar --- */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .scene {
+      --p: 0;
+    }
+
+    :global(html.js) .milestone:not([data-lit]) {
+      --c: var(--text-2);
+    }
+
+    :global(html.js) .milestone:not([data-lit]) .dot {
+      border-color: var(--line);
+      background: var(--bg);
+    }
+
+    :global(html.js) .title,
+    :global(html.js) .line,
+    :global(html.js) .year,
+    :global(html.js) .dot {
+      transition:
+        color 0.2s,
+        background-color 0.2s,
+        border-color 0.2s;
+    }
+  }
+
+  /* --- Escritorio (d-09) --- */
+  @media (min-width: 960px) {
+    .stage {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100svh - var(--nav-h));
+      padding: 48px 0 56px;
+    }
+
+    .timeline {
+      /* Centrada en lo que queda bajo el encabezado, como en la maqueta. */
+      margin: auto 0;
+    }
+
+    .list {
+      display: grid;
+      grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    }
+
+    .milestone {
+      display: grid;
+      grid-template-rows: 200px auto;
+      align-content: start;
+      min-height: 0;
+      padding: 0 32px 0 0;
+    }
+
+    .milestone:last-child {
+      padding-right: 0;
+    }
+
+    /* Círculo sobre la línea central: 8 unidades del lienzo tras el inicio de la columna. */
+    .dot {
+      left: calc(var(--n) * 100% * 8 / 1248 - 7px);
+      top: calc(200px + var(--dot-y) * 1px - 7px);
+    }
+
+    .year {
+      align-self: end;
+      justify-self: start;
+      margin-bottom: 20px;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      color: var(--c);
+    }
+
+    /* La banda del trazo (60 px) y el margen de la maqueta (28 px). */
+    .title {
+      margin-top: 88px;
+      font-size: 28px;
+    }
+
+    .detail {
+      margin-top: 8px;
+      font-size: 17px;
+    }
+
+    .line {
+      margin-top: 16px;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+  }
+
+  /* Escritorio estrecho (960–1199 px, sin maqueta): columnas de ~190–260 px; textos menores (F39). */
+  @media (min-width: 960px) and (max-width: 1199px) {
+    .milestone {
+      padding-right: 24px;
+    }
+
+    .title {
+      font-size: 24px;
+    }
+
+    .detail,
+    .line {
+      font-size: 16px;
+    }
+  }
+
+  /* Escritorio de poca altura (F39): márgenes menores y un aire mínimo bajo el encabezado. */
+  @media (min-width: 960px) and (max-height: 860px) {
+    .stage {
+      padding: 32px 0;
+    }
+
+    .stage > :global(.heading) {
+      margin-bottom: 24px;
+    }
+  }
+
+  /* --- Escenario (escritorio ≥ 700 px de alto, con JS y movimiento) --- */
+  @media (min-width: 960px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+    :global(html.js) .scene {
+      /* El escenario y medio alto de pantalla por hito. */
+      height: calc(100svh - var(--nav-h) - 1px + var(--n) * 50svh);
+    }
+
+    :global(html.js) .stage {
+      position: sticky;
+      top: calc(var(--nav-h) + 1px);
+      height: calc(100svh - var(--nav-h) - 1px);
+      min-height: 0;
+      overflow: clip;
+    }
+  }
+</style>
+
+<script>
+  import '../../scripts/journey.ts';
+</script>

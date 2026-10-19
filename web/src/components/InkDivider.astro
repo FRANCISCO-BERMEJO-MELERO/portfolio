@@ -1,0 +1,44 @@
+---
+// Separador sumi-e entre secciones (C13): dos en la página, Proyectos → Trayectoria y Stack → Contacto
+// (Home.astro). Es decoración (aria-hidden). Se dibuja una vez al entrar en vista: la animación de
+// InkStroke (draw) espera parada hasta que reveal.ts marca el separador. Sin JS o con reduced motion,
+// trazo entero desde el principio.
+import InkStroke from './InkStroke.astro';
+import { divider } from '../data/ink/divider.ts';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div class="divider" aria-hidden="true" data-reveal="1" data-qa="ink-divider">
+  <InkStroke id={id} viewBox={divider.viewBox} points={divider.points} widths={divider.widths} draw={{ duration: 700 }} />
+</div>
+
+<script>
+  import '../scripts/reveal.ts';
+</script>
+
+<style>
+  /* Centrado en el ancho de la página, entre los márgenes de las dos secciones. */
+  .divider {
+    width: 160px;
+    height: 12px;
+    margin: 24px auto;
+    color: var(--text-2);
+  }
+
+  :global(html.js) .divider:not([data-revealed]) :global(.reveal) {
+    animation-play-state: paused;
+  }
+
+  @media (min-width: 960px) {
+    .divider {
+      width: 240px;
+      height: 18px;
+      margin: 32px auto;
+    }
+  }
+</style>

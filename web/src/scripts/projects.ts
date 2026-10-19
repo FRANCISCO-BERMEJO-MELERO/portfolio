@@ -102,7 +102,8 @@ function start(scene: HTMLElement) {
   carousel.addEventListener('change', sync);
   sync();
 
-  // Enlaces a un panel (índice, y los enlaces pendientes de cada panel): al tramo o al carrusel.
+  // Enlaces a un panel (índice, enlaces pendientes de cada panel y «usado en» del stack): al tramo o
+  // al carrusel. Desde fuera de la sección (el stack), en el carrusel hay que bajar también hasta ella.
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
@@ -110,7 +111,7 @@ function start(scene: HTMLElement) {
     if (k < 0) return;
     e.preventDefault();
     if (location.hash !== a!.hash) history.pushState(null, '', a!.hash);
-    go(k, smooth());
+    go(k, smooth(), !scene.closest('section')?.contains(a));
   });
 
   // #hash al cargar y al navegar por el historial: corrige el salto nativo del navegador, que lleva

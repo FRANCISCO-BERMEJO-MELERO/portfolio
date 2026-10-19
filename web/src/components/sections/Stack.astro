@@ -1,9 +1,142 @@
 ---
-// 五 Stack. Fase 1: solo el encabezado; el contenido llega en la fase 6.
+// 五 Stack (d-11, d-12, m-10, m-11): cuatro grupos de tecnologías. Las que usa algún proyecto abren
+// su lista «usado en» (TechItem.astro); stack.ts la calcula desde projects.ts.
+// - Escritorio: cuatro columnas centradas en vertical en la pantalla bajo la nav.
+// - Móvil: grupos uno bajo otro, con las tecnologías en dos columnas.
+// - Al entrar en vista, los grupos y sus tecnologías aparecen escalonados (≤ 600 ms en total,
+//   criterio 3). Sin JS o con reduced motion, todo se ve desde el principio.
 import Section from '../Section.astro';
 import SectionHeading from '../SectionHeading.astro';
+import TechItem from '../stack/TechItem.astro';
+import { stack } from '../../data/stack.ts';
+
+// Orden de aparición: cada título de grupo y cada tecnología, en el orden de lectura.
+let order = 0;
+const groups = stack.map((g) => ({ ...g, i: order++, items: g.items.map((t) => ({ ...t, i: order++ })) }));
 ---
 
-<Section id="stack">
-  <SectionHeading section="stack" />
+<Section id="stack" flush>
+  <div class="stack" data-qa="stack">
+    <SectionHeading section="stack" />
+    <div class="groups" data-reveal style={`--steps: ${order - 1}`} data-qa="stack-groups">
+      {
+        groups.map((g) => (
+          <div class="group" data-qa="stack-group">
+            <h3 class="title" style={`--i: ${g.i}`} data-qa="stack-title">
+              {g.title}
+            </h3>
+            <ul class="list" data-qa="stack-list">
+              {g.items.map((t) => (
+                <TechItem name={t.name} usedIn={t.usedIn} i={t.i} />
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
 </Section>
+
+<script>
+  import '../../scripts/stack.ts';
+  import '../../scripts/reveal.ts';
+</script>
+
+<style>
+  /* Móvil (m-10). Ocupa la pantalla bajo la nav, como Section sin flush, con sus márgenes. */
+  .stack {
+    min-height: calc(100svh - var(--nav-h));
+    padding: 28px 0 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .groups {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .title {
+    margin-bottom: 10px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: normal;
+  }
+
+  .list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    border-top: 1px solid var(--text);
+    font-family: var(--font-mono);
+    font-size: 16px;
+  }
+
+  /* Aparición escalonada (criterio 3): 150 ms por pieza y el comienzo de cada una repartido en
+     400 ms (--steps = piezas − 1). La última acaba a los 550 ms, haya las piezas que haya: el resto
+     hasta 600 deja margen a los fotogramas que tarda en empezar. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) .groups .title,
+    :global(html.js) .groups :global(.tech) {
+      opacity: 0;
+      transform: translateY(8px);
+      transition:
+        opacity 150ms ease-out,
+        transform 150ms ease-out;
+      transition-delay: calc(var(--i) * 400ms / var(--steps));
+    }
+
+    :global(html.js) .groups[data-revealed] .title,
+    :global(html.js) .groups[data-revealed] :global(.tech) {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Escritorio (d-11): cuatro columnas en medio del espacio que deja el encabezado. */
+  @media (min-width: 960px) {
+    .stack {
+      gap: 48px;
+      padding: 48px 0 56px;
+    }
+
+    .groups {
+      margin-block: auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 40px;
+    }
+
+    /* Dos líneas de alto siempre («Backend y herramientas»): las listas empiezan a la misma altura. */
+    .title {
+      margin-bottom: 16px;
+      min-height: 76px;
+      display: flex;
+      align-items: flex-end;
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    .list {
+      display: block;
+      font-size: 19px;
+    }
+  }
+
+  /* Entre 960 y 1199 px (sin maqueta) las columnas bajan a 194 px y «herramientas» no cabe a 32 px:
+     títulos de 26 px y tecnologías de 17 px, como la trayectoria en ese tramo (F39). */
+  @media (min-width: 960px) and (max-width: 1199px) {
+    .title {
+      font-size: 26px;
+    }
+
+    .list {
+      font-size: 17px;
+    }
+  }
+</style>

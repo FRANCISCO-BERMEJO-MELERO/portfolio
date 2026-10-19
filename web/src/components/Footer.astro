@@ -1,0 +1,84 @@
+---
+// Pie (d-13, m-12): © con el año del build, atribución de los trazos de 改善 (KanjiVG, CC BY-SA 3.0;
+// LICENSE-kanji.md) y «Volver arriba». Va dentro de Contacto, al fondo de su pantalla, como en las
+// maquetas.
+import { site } from '../data/site.ts';
+import { ui } from '../i18n/ui.ts';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer" data-qa="footer">
+  <span data-qa="footer-copy">{ui.footer.copyright(year, site.name)}</span>
+  <span
+    >{ui.footer.strokes.prefix} <span aria-hidden="true">{ui.footer.strokes.word}</span><span class="visually-hidden"
+      >{ui.footer.strokes.reading}</span
+    >: <a class="hit" href="https://kanjivg.tagaini.net/" data-qa="footer-kanjivg">KanjiVG</a> · {
+      ui.footer.license
+    }</span
+  >
+  <a class="top" href="#inicio" data-qa="footer-top">{ui.footer.top}&nbsp;<span aria-hidden="true">↑</span></a>
+</footer>
+
+<style>
+  /* Móvil (m-12): en columna. */
+  .footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    line-height: normal;
+    color: var(--text-2);
+  }
+
+  a {
+    text-underline-offset: 4px;
+  }
+
+  /* Área pulsable de 44 px de alto sin mover el texto (D5), como los enlaces de la nav. */
+  .hit {
+    position: relative;
+  }
+
+  .hit::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 46px);
+    height: 46px;
+    transform: translate(-50%, -50%);
+  }
+
+  /* En móvil el área de KanjiVG (46 px) se metería 8 px en la de «Volver arriba»: se separan esos
+     8 px más que en m-12 (F44). */
+  .top {
+    min-height: 44px;
+    margin-top: 8px;
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  /* Escritorio (d-13): en una fila. */
+  @media (min-width: 960px) {
+    .footer {
+      padding-top: 20px;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      font-size: 15px;
+    }
+
+    .top {
+      margin-top: 0;
+      align-self: auto;
+    }
+  }
+</style>

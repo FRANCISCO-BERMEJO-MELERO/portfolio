@@ -1,0 +1,139 @@
+---
+// Una tecnología del stack (d-11, m-10). Sin proyectos que la usen, texto plano. Con proyectos, un
+// botón desplegable (C5) que abre la lista «usado en» con un enlace a cada panel:
+// - clic, toque, Enter y Espacio abren y cierran (aria-expanded; scripts/stack.ts);
+// - con ratón, el hover solo previsualiza la lista; el clic la fija o la suelta (riesgo de la fase 6);
+// - sin JS, la lista se ve siempre (D7).
+// --i es su orden en la sección: lo usa la aparición escalonada (Stack.astro).
+import { ui } from '../../i18n/ui.ts';
+
+interface Props {
+  name: string;
+  usedIn: readonly { id: string; name: string }[];
+  i: number;
+}
+
+const { name, usedIn, i } = Astro.props;
+const panel = `usado-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+---
+
+{
+  usedIn.length ? (
+    <li class="tech used" style={`--i: ${i}`} data-tech data-qa="stack-item-used">
+      <button type="button" class="toggle" aria-expanded="false" aria-controls={panel} data-tech-toggle data-qa="stack-toggle">
+        {name}
+        <span class="hint" aria-hidden="true" data-qa="stack-hint">
+          {ui.stack.usedIn}
+        </span>
+      </button>
+      <p class="projects" id={panel} data-qa="stack-projects">
+        {usedIn.map((p, k) => (
+          <>
+            {k > 0 && ' · '}
+            <a href={`#${p.id}`} data-qa="stack-project">
+              {p.name}
+            </a>
+          </>
+        ))}
+      </p>
+    </li>
+  ) : (
+    <li class="tech" style={`--i: ${i}`} data-qa="stack-item">
+      {name}
+    </li>
+  )
+}
+
+<style>
+  /* Móvil (m-10). Las maquetas no fijan interlineado: «normal», como el encabezado. */
+  .tech {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    line-height: normal;
+  }
+
+  /* El botón ocupa la fila entera (m-10): así la pista cabe y abrir no recoloca la rejilla. */
+  .used {
+    grid-column: 1 / -1;
+    padding: 0;
+  }
+
+  .used:has([aria-expanded='true']) {
+    background: var(--surface);
+  }
+
+  .toggle {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    background: none;
+    border: 0;
+    font: inherit;
+    line-height: normal;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .hint {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  .projects {
+    padding: 0 12px 12px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  .projects a {
+    color: var(--accent-text-surface);
+    text-underline-offset: 4px;
+  }
+
+  .projects a:hover {
+    color: var(--accent-hover);
+  }
+
+  /* Con JS, cerrada salvo que el botón diga lo contrario o (con ratón) mientras se pasa por encima. */
+  :global(html.js) .toggle[aria-expanded='false'] + .projects {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    :global(html.js) .used:hover .toggle[aria-expanded='false'] + .projects {
+      display: block;
+    }
+  }
+
+  /* Escritorio (d-11). */
+  @media (min-width: 960px) {
+    .tech {
+      padding: 14px 0;
+    }
+
+    .used {
+      padding: 0;
+    }
+
+    .toggle {
+      padding: 14px 12px;
+    }
+
+    .hint {
+      font-size: 15px;
+    }
+
+    .projects {
+      padding: 0 12px 14px;
+      font-size: 17px;
+    }
+  }
+</style>

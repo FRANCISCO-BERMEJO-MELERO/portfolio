@@ -1,5 +1,5 @@
 ---
-// La página: navegación fija y las seis secciones en orden.
+// La página: navegación fija, las seis secciones en orden y los dos separadores sumi-e (C13).
 import { ui } from '../i18n/ui.ts';
 import Nav from './Nav.astro';
 import Hero from './sections/Hero.astro';
@@ -8,10 +8,7 @@ import Projects from './sections/Projects.astro';
 import Journey from './sections/Journey.astro';
 import Stack from './sections/Stack.astro';
 import Contact from './sections/Contact.astro';
-// Mientras las secciones no los usan (fases 3–6), se cargan aquí para que STRICT_CONTENT los valide
-// y para que stack.ts compruebe el stack de cada proyecto.
-import '../data/journey.ts';
-import '../data/stack.ts';
+import InkDivider from './InkDivider.astro';
 ---
 
 <a class="skip-link" href="#contenido">{ui.skipLink}</a>
@@ -20,8 +17,10 @@ import '../data/stack.ts';
   <Hero />
   <About />
   <Projects />
+  <InkDivider id="ink-divider-1" />
   <Journey />
   <Stack />
+  <InkDivider id="ink-divider-2" />
   <Contact />
 </main>
 

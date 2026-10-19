@@ -13,9 +13,13 @@ export const site = {
   facts: [done('Córdoba'), done('Web3 + IA'), done('Gavisa')],
   photo: pending('foto: sí o no'),
   contact: {
+    // En claro (P9). Cuando llegue: la dirección (el enlace es mailto:).
     email: pending('email de contacto'),
-    github: { label: done('github.com/FRANCISCO-BERMEJO-MELERO'), href: 'https://github.com/FRANCISCO-BERMEJO-MELERO' },
+    // En móvil se ve solo el usuario (m-12): el host va aparte.
+    github: { host: 'github.com/', user: 'FRANCISCO-BERMEJO-MELERO', href: 'https://github.com/FRANCISCO-BERMEJO-MELERO' },
+    // Cuando llegue: la URL completa del perfil.
     linkedin: pending('perfil de LinkedIn'),
-    cv: pending('CV en PDF'),
+    // PDF en public/cv/. El que hay es de prueba (máximo 500 KB: criterio 5 de la fase 6).
+    cv: provisional('/cv/francisco-bermejo-cv.pdf', 'CV en PDF'),
   },
 };

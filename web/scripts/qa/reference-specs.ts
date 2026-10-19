@@ -62,6 +62,7 @@ const ROTATE_3 = 'matrix(0.99863, -0.052336, 0.052336, 0.99863, 0, 0)';
 const ROTATE_4 = 'matrix(0.997564, -0.0697565, 0.0697565, 0.997564, 0, 0)';
 const SERIF = /^"?Shippori Mincho"?/;
 const SANS = /^"?Inter"?/;
+const MONO = /^"?IBM Plex Mono"?/;
 
 export const SPECS: Spec[] = [
   // --- Navegación · escritorio (d-01; el sello, de d-07, decisión F4) ---
@@ -545,4 +546,61 @@ export const SPECS: Spec[] = [
   { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-line', css: { 'font-size': 16, 'line-height': 24, 'margin-top': 10, color: t('text-2') } },
   { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-line', reduced: true, css: { color: t('text') } },
   { ref: 'm-08', viewport: 'mobile', path: '/', qa: 'journey-dot', box: { width: 14, height: 14 }, css: { 'border-top-color': t('line'), 'background-color': t('bg') } },
+
+  // --- Stack · escritorio (d-11). El desplegable abierto (fondo --surface, enlace) lo mide qa:stack. ---
+  { ref: 'd-11', viewport: 'desktop', path: '/', qa: 'stack-groups', css: { 'column-gap': 40 } },
+  {
+    ref: 'd-11',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'stack-title',
+    box: { height: 76 },
+    css: { 'font-family': SERIF, 'font-weight': '600', 'font-size': 32, 'line-height': 36.8, 'margin-bottom': 16, color: t('text') },
+  },
+  { ref: 'd-11', viewport: 'desktop', path: '/', qa: 'stack-list', css: { 'font-family': MONO, 'font-size': 19, 'border-top-width': 1, 'border-top-color': t('text') } },
+  { ref: 'd-11', viewport: 'desktop', path: '/', qa: 'stack-item', css: { 'padding-top': 14, 'padding-bottom': 14, 'border-bottom-color': t('line'), color: t('text') } },
+  { ref: 'd-11', viewport: 'desktop', path: '/', qa: 'stack-toggle', css: { 'padding-top': 14, 'padding-left': 12, 'min-height': 44, color: t('text') } },
+  { ref: 'd-11', viewport: 'desktop', path: '/', qa: 'stack-hint', css: { 'font-family': SANS, 'font-size': 15, color: t('text-2') } },
+
+  // --- Stack · móvil (m-10) ---
+  { ref: 'm-10', viewport: 'mobile', path: '/', qa: 'stack-title', css: { 'font-family': SERIF, 'font-size': 26, 'margin-bottom': 10 } },
+  { ref: 'm-10', viewport: 'mobile', path: '/', qa: 'stack-list', css: { 'font-family': MONO, 'font-size': 16, 'column-gap': 16, 'border-top-color': t('text') } },
+  { ref: 'm-10', viewport: 'mobile', path: '/', qa: 'stack-item', box: { width: 163 }, css: { 'padding-top': 12, 'padding-bottom': 12 } },
+  { ref: 'm-10', viewport: 'mobile', path: '/', qa: 'stack-toggle', box: { width: 342 }, css: { 'padding-top': 12, 'padding-left': 12 } },
+  { ref: 'm-10', viewport: 'mobile', path: '/', qa: 'stack-hint', css: { 'font-size': 14, color: t('text-2') } },
+
+  // --- Contacto · escritorio (d-13) ---
+  {
+    ref: 'd-13',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'contact-title',
+    css: { 'font-family': SERIF, 'font-weight': '600', 'font-size': 184, 'line-height': 184, 'letter-spacing': -5.52, color: t('text') },
+  },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'contact-head', css: { 'margin-top': 28 } },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'contact-hanko', box: { width: 136, height: 136 }, css: { 'font-size': 60, 'outline-offset': -12, 'background-color': t('accent') } },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'contact-links', css: { 'border-top-color': t('text') } },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'contact-label', box: { width: 160 }, css: { 'font-size': 15, 'padding-top': 20, 'letter-spacing': 2.1, color: t('text-2') } },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'contact-value', css: { 'font-size': 24, 'padding-top': 16, 'border-bottom-color': t('line') } },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'contact-link', css: { color: t('accent-text'), 'text-underline-offset': 5 } },
+  {
+    ref: 'd-13',
+    viewport: 'desktop',
+    path: '/',
+    qa: 'contact-cv',
+    box: { height: 64 },
+    css: { 'font-size': 20, 'font-weight': '600', 'padding-left': 36, 'background-color': t('accent-solid'), color: t('on-accent') },
+  },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'footer', css: { 'font-size': 15, 'padding-top': 20, 'border-top-color': t('line'), color: t('text-2') } },
+  { ref: 'd-13', viewport: 'desktop', path: '/', qa: 'footer-top', box: { height: 44 }, css: { color: t('accent-text') } },
+
+  // --- Contacto · móvil (m-12) ---
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-title', css: { 'font-family': SERIF, 'font-size': 58, 'line-height': 58 } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-head', css: { 'margin-top': 24, 'padding-bottom': 70 } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-hanko', box: { width: 72, height: 72 }, css: { 'font-size': 31, 'outline-offset': -7 } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-links', css: { 'margin-top': 20 } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-label', css: { 'font-size': 13, color: t('text-2') } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-value', css: { 'font-size': 19, 'margin-top': 4 } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'contact-cv', box: { width: 342, height: 56 }, css: { 'font-size': 19, 'margin-top': 28 } },
+  { ref: 'm-12', viewport: 'mobile', path: '/', qa: 'footer', css: { 'font-size': 14, 'padding-top': 16 } },
 ];

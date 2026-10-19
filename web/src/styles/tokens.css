@@ -90,6 +90,14 @@
   --hanko-nav-ring: 1.5px;
   --hanko-nav-inset: 4px;
   --hanko-nav-rot: -3deg;
+  /* Sello del cierre (m-12 / d-13), junto a «¿Hablamos?». En escritorio escala con el título entre
+     960 y 1440 px y llega a las medidas de d-13 a 1440. */
+  --hanko-contact-size: 72px;
+  --hanko-contact-font: 31px;
+  --hanko-contact-radius: 4px;
+  --hanko-contact-ring: 1.5px;
+  --hanko-contact-inset: 7px;
+  --hanko-contact-rot: -7deg;
 }
 
 @media (min-width: 960px) {
@@ -109,5 +117,11 @@
     --hanko-nav-size: 44px;
     --hanko-nav-font: 19px;
     --hanko-nav-inset: 5px;
+
+    --hanko-contact-size: min(9.4444vw, 136px);
+    --hanko-contact-font: min(4.1667vw, 60px);
+    --hanko-contact-radius: 6px;
+    --hanko-contact-ring: 2.5px;
+    --hanko-contact-inset: min(0.8333vw, 12px);
   }
 }

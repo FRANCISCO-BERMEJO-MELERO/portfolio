@@ -1,13 +1,13 @@
 ---
 // Sello (hanko) con las iniciales: relleno bermellón, anillo interior y un leve giro (d-01, d-02,
-// d-07, m-01, m-06). Las medidas de cada uso son tokens (--hanko-<uso>-*, tokens.css). Quien lo
+// d-07, d-13, m-01, m-06, m-12). Las medidas de cada uso son tokens (--hanko-<uso>-*, tokens.css). Quien lo
 // contiene puede sustituir el radio, el anillo, su separación, el giro y la escala de la letra con
 // --hanko-radius, --hanko-ring, --hanko-inset, --hanko-rot y --hanko-text-scale: el tránsito de la nav
 // lo hace en cada fotograma. Es el logotipo de la web: data-logo (exento de contraste, F6).
 import { site } from '../data/site.ts';
 
 interface Props {
-  variant: 'hero' | 'nav';
+  variant: 'hero' | 'nav' | 'contact';
   [attr: `data-${string}`]: unknown;
 }
 
@@ -52,6 +52,15 @@ const { variant, ...attrs } = Astro.props;
     --v-ring: var(--hanko-hero-ring);
     --v-inset: var(--hanko-hero-inset);
     --v-rot: var(--hanko-hero-rot);
+  }
+
+  .hanko[data-variant='contact'] {
+    --v-size: var(--hanko-contact-size);
+    --v-font: var(--hanko-contact-font);
+    --v-radius: var(--hanko-contact-radius);
+    --v-ring: var(--hanko-contact-ring);
+    --v-inset: var(--hanko-contact-inset);
+    --v-rot: var(--hanko-contact-rot);
   }
 
   .text {

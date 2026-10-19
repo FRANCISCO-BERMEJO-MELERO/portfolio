@@ -55,4 +55,24 @@ export const ui = {
     // Solo en móvil, bajo el carrusel (m-06).
     swipe: 'Desliza para abrir el siguiente panel',
   },
+  stack: {
+    // Pista visible del botón de las tecnologías con proyectos (d-11, m-10). Va oculta para el
+    // lector de pantalla: el botón ya se anuncia con su nombre y su estado (aria-expanded).
+    usedIn: 'usado en',
+  },
+  contact: {
+    title: '¿Hablamos?',
+    email: 'Email',
+    github: 'GitHub',
+    linkedin: 'LinkedIn',
+    cv: 'Descargar CV (PDF)',
+  },
+  footer: {
+    copyright: (year: number, name: string) => `© ${year} ${name}`,
+    // «改善» se anuncia una sola vez en la página (criterio 4 de la fase 3, la escena): aquí el lector
+    // de pantalla oye la lectura y la vista ve los kanji.
+    strokes: { prefix: 'Trazos de', word: '改善', reading: 'kaizen' },
+    license: 'CC BY-SA 3.0',
+    top: 'Volver arriba',
+  },
 } as const;

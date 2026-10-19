@@ -9,6 +9,8 @@
 //                       del hero, ensō + sello, dura 1,6 s)
 //   --widths 768,1024   anchos extra (papel; < 960 con el diseño móvil) para validar la escala intermedia;
 //                       también ancho × alto (1280x720, 375x667)
+//   --settle ms         espera tras cada estado, antes de la captura (por defecto 300; 900 deja terminar
+//                       lo que aparece al entrar en vista: el stack y el sello del cierre)
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { arg, run, sleep, type Theme, type ViewportName } from './lib.ts';
@@ -17,6 +19,7 @@ const PATH = arg('path') ?? '/';
 const AT = (arg('at') ?? '0').split(',');
 const OUT = arg('out') ?? 'qa-output/shots';
 const WAIT = Number(arg('wait') ?? 1800);
+const SETTLE = Number(arg('settle') ?? 300);
 const WIDTHS = (arg('widths') ?? '')
   .split(',')
   .filter(Boolean)
@@ -63,7 +66,7 @@ await run('qa:shots', async ({ url, browser }) => {
             ? `scrollTo({ top: ${Number.parseFloat(at)}, behavior: 'instant' })`
             : `scrollTo({ top: Math.round(${Number(at)} * (document.documentElement.scrollHeight - innerHeight)), behavior: 'instant' })`,
       );
-      await sleep(300);
+      await sleep(SETTLE);
       const name = `${slug(PATH)}-${v.width ? `${v.width}${v.height ? `x${v.height}` : ''}` : v.viewport}-${v.theme}${v.reduced ? '-reduced' : ''}${v.nojs ? '-nojs' : ''}-${slug(at)}.png`;
       writeFileSync(join(OUT, name), await page.screenshot());
       console.log(`  ${join(OUT, name)}`);

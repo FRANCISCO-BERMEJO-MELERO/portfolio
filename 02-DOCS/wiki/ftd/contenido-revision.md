@@ -153,7 +153,7 @@ Grupos en inglés: Frontend · Web3 · Backend & tools · AI & automation (**red
 ### 六 Contacto
 | Campo | ES | EN | Origen |
 | --- | --- | --- | --- |
-| Titular | ¿Hablamos? | Shall we talk? | ya estaba; EN **redactado** |
+| Titular | ¿Hablamos? | Let's talk | ya estaba; EN **redactado** («Shall we talk?» empujaba el sello 6 px fuera de la pantalla a 1440) |
 | Texto breve | — | — | el diseño no tiene hueco para él (d-13, m-12) |
 | Email | **pendiente** | | — |
 | GitHub | github.com/FRANCISCO-BERMEJO-MELERO | | spec |
@@ -252,5 +252,30 @@ Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: 3 año
   visibles, y el orden de Tab cuenta los enlaces reales de cada panel. `reference-specs.ts`: fuera
   la medida de `project-tech-todo`, que ya no existe.
 
-## Validación
-Se completa al final de la sesión (abajo).
+## Validación (22 oct, sobre el build de esta rama)
+| # (spec) | Comprobación | Resultado |
+| --- | --- | --- |
+| 1 | Cero marcadores | `pnpm content:pending`: quedan solo los de «Pendiente» (3 años, email, CV, 3 capturas y su pie). En el HTML de `/` y `/en/`: sin `href="#"`, `lorem`, `TODO` ni `XXXX` |
+| 2 | Build | `pnpm build`: `astro check` 0 errores, 0 avisos, 0 sugerencias; 2 páginas (`/`, `/en/`); sin avisos nuevos |
+| 3 | Enlaces externos | 10 responden 200: los 5 repos, el perfil de GitHub, las 2 demos, KanjiVG y la licencia CC BY-SA 3.0. LinkedIn: 999 (bloqueo de bots; ver incoherencias) |
+| 4 | Encaje | `pnpm qa:content` ✓: 1440, 390 y 320 px × papel y sumi × ES y EN, con y sin reduced motion. Sin desbordes, sin textos que se crucen y el nombre del hero en 2 líneas a 320 px. 72 capturas en `capturas-contenido/` (`<idioma>-<ancho>-<modo>-<sección>.jpg`). Se comprobó que la regla de solapes detecta el fallo real que hubo (el kaizen largo sobre los datos rápidos) |
+| 4 | Pruebas de cada sección | ✓ `qa:about`, `qa:journey`, `qa:contact`, `qa:hanko`, `qa:kaizen`, `qa:nav`, `qa:theme`, `qa:weight`; ✓ `qa:axe`, `qa:keys` y `qa:overflow` en `/` y en `/en/` |
+| 4 | `qa:specs` y `qa:projects` | ✗ por una sola diferencia: Chainview tiene **una** tecnología del stack (Go) y su fila de etiquetas mide 33 px en vez de los 74 de la maqueta (que tenía relleno); el dato y los enlaces suben 41 px. Es contenido real, no un desborde. **Decide**: dejarlo así y actualizar la medida, o dar a la fila un alto mínimo |
+| — | `qa:hero` y `qa:perf` | ✗ fotogramas de más de 33 ms con CPU ×4. Ya estaba abierto en la fase 6 («repetir con el equipo en reposo»). No se ha medido contra la rama anterior en esta sesión |
+| 5 | SEO | `lang` es / en; `hreflang` es, en y x-default recíprocos en las dos páginas; JSON-LD válido (`JSON.parse`) con `Person`; descripción de 154 (ES) y 157 (EN) caracteres. URL relativas hasta que haya dominio |
+| — | Control de `qa:content` (puerta nueva) | Falla con un caso malo conocido (el kaizen largo inyectado: detecta el cruce) y pasa con el contenido final. Límite: solo mira cajas de texto; un elemento no textual que se sale (el sello de Contacto) lo detectó `qa:overflow`, no `qa:content` |
+| 6 | Accesibilidad del contenido | `lang` por página; los kanji llevan `lang="ja"` y su lectura (escena: «改善, kaizen»; significado: kai / zen; pie: lectura oculta); la única imagen tiene `alt`; axe 0 serious/critical en ES y EN |
+
+Última pasada, con el árbol final (base `4d0e36c`, cambios sin commit hasta este): build 0/0/0,
+`qa:content` ✓, `qa:specs` y `qa:projects` ✗ solo por la fila de etiquetas de Chainview.
+`qa:about`, `qa:journey`, `qa:hanko`, `qa:kaizen`, `qa:nav`, `qa:theme` y `qa:weight` pasaron sobre el
+build anterior al último cambio (titular EN de Contacto y espacio del pie); `qa:contact`,
+`qa:overflow` y `qa:content` se repitieron después.
+
+**Veredicto: no cerrada.** Quedan abiertos: los pendientes de Fran (email, CV, años, capturas), la
+decisión sobre la fila de etiquetas de Chainview y los fotogramas de `qa:hero` / `qa:perf` (abierto
+desde la fase 6). Todo lo demás de la spec tiene evidencia arriba.
+
+## Siguiente paso
+Fran revisa los textos marcados como **redactado**, pasa los datos pendientes y decide lo de Chainview.
+Con eso, `STRICT_CONTENT=1 pnpm build` debe pasar y la fase se cierra.

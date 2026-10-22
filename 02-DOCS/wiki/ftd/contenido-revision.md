@@ -33,7 +33,8 @@ verificados de la spec, las maquetas de `reference/` y las respuestas de Fran.
 | La previa | Se describe lo que hace el código (lógica en funciones RPC de Supabase) |
 | Validación | Con las herramientas del proyecto (Chrome por CDP), no con Playwright (decisión previa del plan, §1.8) |
 | Foto | Fuera: el diseño no tiene hueco |
-| Email, CV, años | **Sin respuesta**: quedan pendientes (abajo) |
+| Email | bermel.f08@gmail.com (respuesta posterior de Fran) |
+| CV, años | CV: «lo subimos al final». Años: sin respuesta; quedan pendientes (abajo) |
 
 ## Textos por sección
 
@@ -199,15 +200,14 @@ Sacado de los repos, por si se abre hueco (fase 7, detalles de cada proyecto):
 ## Pendiente
 | Qué | Dónde se cambia | Nota |
 | --- | --- | --- |
-| Email de contacto | `web/src/data/site.ts` (`contact.email`) | También entra en el JSON-LD si se quiere |
-| CV en PDF | `web/public/cv/` y `contact.cv` en `site.ts` | El de ahora es de prueba. Dijiste «quítalo / lo sustituyo yo» sin elegir |
+| CV en PDF | `web/public/cv/` y `contact.cv` en `site.ts` | El de ahora es de prueba. Fran lo sube al final |
 | Años de los hitos 1, 2 y 3 | `web/src/data/journey.ts` | Inicio del DAM, Fernauro, prácticas en Gavisa |
 | Año del título de DAM | `journey.ts`, en el detalle del hito que le toque | No es 2023 |
 | Capturas de DocChain, FinTrack y Web3 Blog (y su pie) | `web/src/assets/projects/` + `projects.ts` | Los repos no las traen; no se han inventado |
 | `og:image` | `web/public/og-image.png` | No existe; prevista en la fase 8 |
 | URL absolutas (canonical, `hreflang`, `og:url`) | `astro.config.mjs` (`site`) | Sin dominio son relativas; Google pide absolutas. Fase 8 |
 
-Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: 3 años, email, CV,
+Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: 3 años, CV,
 3 capturas y su pie (en ES y EN). `STRICT_CONTENT=1 pnpm build` fallará hasta que lleguen.
 
 ## Incoherencias encontradas

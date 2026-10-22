@@ -28,13 +28,14 @@ verificados de la spec, las maquetas de `reference/` y las respuestas de Fran.
 | Tema | Decisión |
 | --- | --- |
 | Inglés | `/en/` con `hreflang` y selector ES / EN en la barra, como en las maquetas (C15). Deja sin efecto P10 |
-| Hitos | Se mantienen 4 (C1). El cuarto es «contrato en Gavisa (2023) y giro a la IA». El título de DAM **no** es de 2023 (la spec estaba mal): va como dato en el hito que le toque por fecha |
+| Hitos | Se mantienen 4 (C1). El cuarto es «contrato en Gavisa (2025) y giro a la IA», con el título de DAM (también 2025) como dato. El «2023» de la spec para título y contrato era un error |
 | LinkedIn | Confirmado el del README de DocChain |
 | La previa | Se describe lo que hace el código (lógica en funciones RPC de Supabase) |
 | Validación | Con las herramientas del proyecto (Chrome por CDP), no con Playwright (decisión previa del plan, §1.8) |
 | Foto | Fuera: el diseño no tiene hueco |
 | Email | bermel.f08@gmail.com (respuesta posterior de Fran) |
-| CV, años | CV: «lo subimos al final». Años: sin respuesta; quedan pendientes (abajo) |
+| Años | Inicio del DAM 2023; Fernauro 2023–24 (primer curso); prácticas en Gavisa 2024–25 (segundo curso, un año); título de DAM y contrato en Gavisa 2025 (contrato desde septiembre); giro a la IA 2025–26 (respuesta posterior de Fran) |
+| CV | «Lo subimos al final» |
 
 ## Textos por sección
 
@@ -112,18 +113,18 @@ Las demás tecnologías del repo que están en el stack cuentan para el «usado 
 ### 四 Trayectoria
 | Hito | Campo | ES | EN | Origen |
 | --- | --- | --- | --- | --- |
-| 1 | Año | **pendiente** | | — |
+| 1 | Año | 2023 | 2023 | Fran |
 | | Título · detalle | Inicio del DAM · CFGS DAM · Ces Lope de Vega | Starting DAM · DAM degree · Ces Lope de Vega | spec |
 | | Frase | Y el Aula de Software Libre de la FP. | Plus the Free Software Classroom. | **redactado** (spec) |
-| 2 | Año | **pendiente** | | — |
+| 2 | Año | 2023 | 2023 | Fran (2023–24: en escritorio el año se escribe en vertical y solo cabe uno; va el de inicio) |
 | | Título · detalle | FP dual en Fernauro · Webs académicas y Java | Fernauro, dual VET · Academic websites and Java | spec |
-| | Frase | Primeros proyectos en una empresa. | First projects inside a company. | **redactado**: «primeros» es una deducción del orden de los hitos; confírmalo |
-| 3 | Año | **pendiente** | | — |
+| | Frase | Primer curso: primeros proyectos. | First year: first real projects. | **redactado** («primer curso», de Fran; «Primer curso · webs académicas y Java» en el detalle partía la línea en móvil) |
+| 3 | Año | 2024 | 2024 | Fran (2024–25, segundo curso; «Segundo curso, un año.» partía la línea en móvil) |
 | | Título · detalle | Prácticas en Gavisa · Blockchain: Ethereum, L2, IPFS, Cosmos y account abstraction (ERC-4337 / 7579) | Internship at Gavisa · … and account abstraction (ERC-4337 / 7579) | spec |
 | | Frase | Un año. IPFS sigue en producción. | A year. IPFS is still in production. | **redactado** (spec) |
-| 4 | Año | 2023 | 2023 | spec, Fran |
-| | Título · detalle | Contrato en Gavisa · Giro a la IA · agentes y n8n | Hired at Gavisa · Turn to AI · agents and n8n | spec, Fran |
-| | Frase | Hoy: agentes de IA, n8n y webs. | Now: AI agents, n8n and websites. | **redactado** (spec) |
+| 4 | Año | 2025 | 2025 | Fran (título y contrato; el giro a la IA es 2025–26) |
+| | Título · detalle | Contrato en Gavisa · Título de DAM · giro a la IA | Hired at Gavisa · DAM degree · turn to AI | spec, Fran |
+| | Frase | Desde septiembre: IA, n8n y webs. | Since September: AI, n8n, websites. | **redactado** (spec, Fran; «agentes de IA» partía la línea en móvil) |
 
 Terminología: «account abstraction» en los dos idiomas, sin traducir, como ya estaba.
 
@@ -156,7 +157,7 @@ Grupos en inglés: Frontend · Web3 · Backend & tools · AI & automation (**red
 | --- | --- | --- | --- |
 | Titular | ¿Hablamos? | Let's talk | ya estaba; EN **redactado** («Shall we talk?» empujaba el sello 6 px fuera de la pantalla a 1440) |
 | Texto breve | — | — | el diseño no tiene hueco para él (d-13, m-12) |
-| Email | **pendiente** | | — |
+| Email | bermel.f08@gmail.com | | Fran |
 | GitHub | github.com/FRANCISCO-BERMEJO-MELERO | | spec |
 | LinkedIn | linkedin.com/in/francisco-bermejo-melero-250669302/ | | repo:DocChain/README.md, confirmado por Fran |
 | CV | **pendiente** (enlaza aún al PDF de prueba, marcado como provisional) | | — |
@@ -201,17 +202,15 @@ Sacado de los repos, por si se abre hueco (fase 7, detalles de cada proyecto):
 | Qué | Dónde se cambia | Nota |
 | --- | --- | --- |
 | CV en PDF | `web/public/cv/` y `contact.cv` en `site.ts` | El de ahora es de prueba. Fran lo sube al final |
-| Años de los hitos 1, 2 y 3 | `web/src/data/journey.ts` | Inicio del DAM, Fernauro, prácticas en Gavisa |
-| Año del título de DAM | `journey.ts`, en el detalle del hito que le toque | No es 2023 |
 | Capturas de DocChain, FinTrack y Web3 Blog (y su pie) | `web/src/assets/projects/` + `projects.ts` | Los repos no las traen; no se han inventado |
 | `og:image` | `web/public/og-image.png` | No existe; prevista en la fase 8 |
 | URL absolutas (canonical, `hreflang`, `og:url`) | `astro.config.mjs` (`site`) | Sin dominio son relativas; Google pide absolutas. Fase 8 |
 
-Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: 3 años, CV,
+Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: CV,
 3 capturas y su pie (en ES y EN). `STRICT_CONTENT=1 pnpm build` fallará hasta que lleguen.
 
 ## Incoherencias encontradas
-- **Spec · título de DAM en 2023.** Era un error de la spec (Fran). El año queda pendiente.
+- **Spec · título de DAM y contrato en 2023.** Era un error de la spec (Fran): los dos son de 2025. Corregido en la web (ES y EN) y en la spec. Sobre mí, kaizen, meta description y JSON-LD no llevan años.
 - **Spec · La previa «con la API dentro de la propia app».** El código no tiene rutas API: la lógica
   está en funciones RPC de Postgres en Supabase. Se describe el código.
 - **Spec · «cinco hitos ya fijados en el diseño».** El diseño tiene 4 (C1). Se mantienen 4.
@@ -255,7 +254,7 @@ Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: 3 año
 ## Validación (22 oct, sobre el build de esta rama)
 | # (spec) | Comprobación | Resultado |
 | --- | --- | --- |
-| 1 | Cero marcadores | `pnpm content:pending`: quedan solo los de «Pendiente» (3 años, email, CV, 3 capturas y su pie). En el HTML de `/` y `/en/`: sin `href="#"`, `lorem`, `TODO` ni `XXXX` |
+| 1 | Cero marcadores | `pnpm content:pending`: quedan solo los de «Pendiente» (CV, 3 capturas y su pie). En el HTML de `/` y `/en/`: sin `href="#"`, `lorem`, `TODO` ni `XXXX` |
 | 2 | Build | `pnpm build`: `astro check` 0 errores, 0 avisos, 0 sugerencias; 2 páginas (`/`, `/en/`); sin avisos nuevos |
 | 3 | Enlaces externos | 10 responden 200: los 5 repos, el perfil de GitHub, las 2 demos, KanjiVG y la licencia CC BY-SA 3.0. LinkedIn: 999 (bloqueo de bots; ver incoherencias) |
 | 4 | Encaje | `pnpm qa:content` ✓: 1440, 390 y 320 px × papel y sumi × ES y EN, con y sin reduced motion. Sin desbordes, sin textos que se crucen y el nombre del hero en 2 líneas a 320 px. 72 capturas en `capturas-contenido/` (`<idioma>-<ancho>-<modo>-<sección>.jpg`). Se comprobó que la regla de solapes detecta el fallo real que hubo (el kaizen largo sobre los datos rápidos) |
@@ -272,7 +271,7 @@ Los marcadores que quedan (`pnpm content:pending`) son exactamente estos: 3 año
 build anterior al último cambio (titular EN de Contacto y espacio del pie); `qa:contact`,
 `qa:overflow` y `qa:content` se repitieron después.
 
-**Veredicto: no cerrada.** Quedan abiertos: los pendientes de Fran (email, CV, años, capturas), la
+**Veredicto: no cerrada.** Quedan abiertos: los pendientes de Fran (CV, capturas), la
 decisión sobre la fila de etiquetas de Chainview y los fotogramas de `qa:hero` / `qa:perf` (abierto
 desde la fase 6). Todo lo demás de la spec tiene evidencia arriba.
 

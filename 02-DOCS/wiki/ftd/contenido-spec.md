@@ -17,13 +17,13 @@ Regla de oro: **no inventes nada.** Si un dato no está en ninguna de estas fuen
 - Nombre en la web: **Francisco Bermejo**. GitHub: github.com/FRANCISCO-BERMEJO-MELERO
 - Basado en Córdoba (España). Datos rápidos del hero/sobre mí: Córdoba · Web3 + IA · Gavisa.
 - Trabaja en **Gavisa TIC** como desarrollador full-stack y Web3; hoy su día a día son agentes de IA y automatizaciones (n8n) y webs para clientes.
-- Formación: **CFGS DAM** en el Ces Lope de Vega (título en 2023). Participó en el Aula de Software Libre de la FP de Córdoba.
+- Formación: **CFGS DAM** en el Ces Lope de Vega (título en 2025; la versión anterior decía 2023, un error corregido por Fran). Participó en el Aula de Software Libre de la FP de Córdoba.
 - **Trayectoria, cinco hitos en este orden** (ya fijado en el diseño):
-  1. Inicio del DAM en el Ces Lope de Vega. *Año de inicio: pendiente.*
-  2. FP dual en **Fernauro**: webs académicas, Java.
-  3. Prácticas en **Gavisa** (un año) aprendiendo blockchain: Ethereum (incluido el Yellow Paper), L2/rollups, IPFS (que sigue en producción), Cosmos, account abstraction (ERC-4337 / 7579) y una dApp de piedra, papel o tijera.
-  4. **2023**: título de DAM y contrato en Gavisa.
-  5. **Giro a la IA**: agentes de IA, automatizaciones con n8n, webs para clientes.
+  1. Inicio del DAM en el Ces Lope de Vega. **2023**.
+  2. **2023–24** (primer curso): FP dual en **Fernauro**: webs académicas, Java.
+  3. **2024–25** (segundo curso): prácticas en **Gavisa** (un año) aprendiendo blockchain: Ethereum (incluido el Yellow Paper), L2/rollups, IPFS (que sigue en producción), Cosmos, account abstraction (ERC-4337 / 7579) y una dApp de piedra, papel o tijera.
+  4. **2025**: título de DAM y contrato en Gavisa (desde septiembre).
+  5. **2025–26 · giro a la IA**: agentes de IA, automatizaciones con n8n, webs para clientes.
 - **Stack** (cerrado, cuatro grupos, no añadas ni quites):
   - Frontend: TypeScript, React, Next.js, Astro, Tailwind
   - Web3: Solidity, Wagmi/Viem, Foundry, Hardhat, IPFS, Cosmos SDK
